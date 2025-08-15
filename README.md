@@ -1,7 +1,7 @@
 # 1000x-developer
 
 This codebase is a demonstration of the principles defined in my [*Becoming a 1000x Developer* blog
-series](https://www.abeahmed.com/blog/becoming-a-1000x-developer).
+series](https://www.abeahmed.com/blog/becoming-a-1000x-developer-part-3).
 
 **What makes this codebase special?**
 
