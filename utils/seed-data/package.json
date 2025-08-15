@@ -1,0 +1,25 @@
+{
+  "name": "@starterp/seed-data",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "seed": "bun run src/index.ts",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "dependencies": {
+    "@starterp/api": "workspace:*",
+    "@starterp/db": "workspace:*",
+    "@starterp/tooling": "workspace:*",
+    "nanoid": "^5.0.9"
+  }
+}

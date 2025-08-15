@@ -1,0 +1,20 @@
+{
+  "name": "starter-project",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "1.2.19",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.29.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "utils/*"
+  ]
+}

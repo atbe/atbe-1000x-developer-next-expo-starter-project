@@ -1,0 +1,41 @@
+name = "starter-project-api"
+main = "src/worker.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
+
+[observability.logs]
+enabled = true
+
+[vars]
+LOG_LEVEL = "info"
+SHOULD_HOST_OPENAPI_SERVER = "false"
+USE_IN_MEMORY_STORAGE = "false"
+USE_WORKERS_DB = "true"
+
+# Production environment
+[env.production.vars]
+LOG_LEVEL = "info"
+SHOULD_HOST_OPENAPI_SERVER = "false"
+USE_IN_MEMORY_STORAGE = "false"
+USE_WORKERS_DB = "true"
+PREMIUM_MONTHLY_STRIPE_PRODUCT_ID = "test"
+GOTRUE_URL = "https://1000x-developer-expo-next-starter-project-production.up.railway.app"
+APP_CONFIG_GOTRUE_URL = "https://1000x-developer-expo-next-starter-project-production.up.railway.app"
+
+
+env.production.secrets_store_secrets = [
+  { binding = "DATABASE_URL", store_id= "starter-project-api-production", secret_name = "DATABASE_URL" },
+  { binding = "STRIPE_SECRET_KEY", store_id= "starter-project-api-production", secret_name = "STRIPE_SECRET_KEY" },
+  { binding = "STRIPE_WEBHOOK_SECRET", store_id= "starter-project-api-production", secret_name = "STRIPE_WEBHOOK_SECRET" },
+  { binding = "GOTRUE_SERVICE_ROLE_KEY", store_id= "starter-project-api-production", secret_name = "GOTRUE_SERVICE_ROLE_KEY" },
+  { binding = "JWT_SECRET", store_id= "starter-project-api-production", secret_name = "JWT_SECRET" }
+]
+
+# Build configuration
+[build]
+command = "echo 'No build step required'"
+
+# Define module rules if needed
+[[rules]]
+type = "ESModule"
+globs = ["**/*.js", "**/*.ts"] 

@@ -1,0 +1,563 @@
+{
+  "id": "c2d155a3-8705-4751-a320-f8abd9a36afd",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "app.billing_events": {
+      "name": "billing_events",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "stripe_event_id": {
+          "name": "stripe_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "billing_event_type",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "billing_event_status",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "event_data": {
+          "name": "event_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stripe_event_created_at": {
+          "name": "stripe_event_created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "billing_events_user_id_users_id_fk": {
+          "name": "billing_events_user_id_users_id_fk",
+          "tableFrom": "billing_events",
+          "tableTo": "users",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "billing_events_stripe_event_id_unique": {
+          "name": "billing_events_stripe_event_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_event_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.subscriptions": {
+      "name": "subscriptions",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tier": {
+          "name": "tier",
+          "type": "subscription_tier",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'premium'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "subscriptions_user_id_users_id_fk": {
+          "name": "subscriptions_user_id_users_id_fk",
+          "tableFrom": "subscriptions",
+          "tableTo": "users",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "subscriptions_user_id_unique": {
+          "name": "subscriptions_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.system_events": {
+      "name": "system_events",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "system_event_type",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "properties": {
+          "name": "properties",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "system_events_user_id_users_id_fk": {
+          "name": "system_events_user_id_users_id_fk",
+          "tableFrom": "system_events",
+          "tableTo": "users",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.users": {
+      "name": "users",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_stripe_customer_id_unique": {
+          "name": "users_stripe_customer_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_customer_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.user_roles": {
+      "name": "user_roles",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_roles_user_id_users_id_fk": {
+          "name": "user_roles_user_id_users_id_fk",
+          "tableFrom": "user_roles",
+          "tableTo": "users",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_roles_user_id_unique": {
+          "name": "user_roles_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "app.billing_event_status": {
+      "name": "billing_event_status",
+      "schema": "app",
+      "values": [
+        "pending",
+        "processed",
+        "failed",
+        "ignored"
+      ]
+    },
+    "app.billing_event_type": {
+      "name": "billing_event_type",
+      "schema": "app",
+      "values": [
+        "account.updated",
+        "account.application.authorized",
+        "account.application.deauthorized",
+        "account.external_account.created",
+        "account.external_account.deleted",
+        "account.external_account.updated",
+        "balance.available",
+        "billing_portal.configuration.created",
+        "billing_portal.configuration.updated",
+        "billing_portal.session.created",
+        "charge.captured",
+        "charge.expired",
+        "charge.failed",
+        "charge.pending",
+        "charge.refunded",
+        "charge.succeeded",
+        "charge.updated",
+        "charge.dispute.closed",
+        "charge.dispute.created",
+        "charge.dispute.funds_reinstated",
+        "charge.dispute.funds_withdrawn",
+        "charge.dispute.updated",
+        "charge.refund.updated",
+        "checkout.session.async_payment_failed",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.completed",
+        "checkout.session.expired",
+        "customer.created",
+        "customer.deleted",
+        "customer.updated",
+        "customer.discount.created",
+        "customer.discount.deleted",
+        "customer.discount.updated",
+        "customer.source.created",
+        "customer.source.deleted",
+        "customer.source.expiring",
+        "customer.source.updated",
+        "customer.subscription.created",
+        "customer.subscription.deleted",
+        "customer.subscription.paused",
+        "customer.subscription.pending_update_applied",
+        "customer.subscription.pending_update_expired",
+        "customer.subscription.resumed",
+        "customer.subscription.trial_will_end",
+        "customer.subscription.updated",
+        "customer.tax_id.created",
+        "customer.tax_id.deleted",
+        "customer.tax_id.updated",
+        "invoice.created",
+        "invoice.deleted",
+        "invoice.finalization_failed",
+        "invoice.finalized",
+        "invoice.marked_uncollectible",
+        "invoice.paid",
+        "invoice.payment_action_required",
+        "invoice.payment_failed",
+        "invoice.payment_succeeded",
+        "invoice.sent",
+        "invoice.upcoming",
+        "invoice.updated",
+        "invoice.voided",
+        "invoiceitem.created",
+        "invoiceitem.deleted",
+        "invoice_payment.paid",
+        "payment_intent.amount_capturable_updated",
+        "payment_intent.canceled",
+        "payment_intent.created",
+        "payment_intent.partially_funded",
+        "payment_intent.payment_failed",
+        "payment_intent.processing",
+        "payment_intent.requires_action",
+        "payment_intent.succeeded",
+        "payment_method.attached",
+        "payment_method.automatically_updated",
+        "payment_method.detached",
+        "payment_method.updated",
+        "payout.canceled",
+        "payout.created",
+        "payout.failed",
+        "payout.paid",
+        "payout.reconciliation_completed",
+        "payout.updated",
+        "plan.created",
+        "plan.deleted",
+        "plan.updated",
+        "price.created",
+        "price.deleted",
+        "price.updated",
+        "product.created",
+        "product.deleted",
+        "product.updated",
+        "setup_intent.canceled",
+        "setup_intent.created",
+        "setup_intent.requires_action",
+        "setup_intent.setup_failed",
+        "setup_intent.succeeded",
+        "subscription_schedule.aborted",
+        "subscription_schedule.canceled",
+        "subscription_schedule.completed",
+        "subscription_schedule.created",
+        "subscription_schedule.expiring",
+        "subscription_schedule.released",
+        "subscription_schedule.updated",
+        "tax_rate.created",
+        "tax_rate.updated",
+        "transfer.created",
+        "transfer.reversed",
+        "transfer.updated"
+      ]
+    },
+    "app.subscription_tier": {
+      "name": "subscription_tier",
+      "schema": "app",
+      "values": [
+        "free",
+        "premium"
+      ]
+    },
+    "app.system_event_type": {
+      "name": "system_event_type",
+      "schema": "app",
+      "values": [
+        "subscription_created",
+        "subscription_updated",
+        "subscription_cancelled",
+        "user_role_created",
+        "user_role_updated",
+        "user_created",
+        "user_updated",
+        "user_deleted"
+      ]
+    },
+    "app.user_role": {
+      "name": "user_role",
+      "schema": "app",
+      "values": [
+        "user",
+        "admin"
+      ]
+    }
+  },
+  "schemas": {
+    "app": "app"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

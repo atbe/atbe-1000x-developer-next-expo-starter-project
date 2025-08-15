@@ -1,0 +1,82 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+The following rules should be considered ALWAYS
+
+# The package manager
+
+This project uses `bun` for all package management and code-running.
+
+# Project structure
+
+This project is a `bun` **monorepo**. Apps are in the `apps` folder, and packages are in the `packages` folder.
+
+# The main `Taskfile.yaml`
+
+The main `Tasfkile.yaml` includes the commands you can use to perform a lot of important core
+operations on the codebase.
+
+## Linting
+
+You can run the linter by running `task lint:fix:type-check`.
+
+ANYTIME YOU ARE MAKING CHANGES, YOU MUST ALWAYS RUN THE LINTER TO CHECK FOR ANY TYPE ERORRS.
+
+## Dependency management
+
+Dependencies are almost always scoped **to a specific package** so its important
+to run the installation commands **inside the directory of the package you want to add
+the dependency to.
+
+### Installing a new dependency
+
+Install new dependencies with buns standard `bun install` command.
+
+### Installing a new **development** dependency
+
+Install new development dependencies with buns standard `bun install -D` command.
+
+## The API service layout
+
+All API services are defined in the `packages/api` package.
+
+### tRPC
+
+All frontend to backend communication must be facilitated using the `tRPC` routers.
+When exposing a method to the frontend clients, you should expose `tRPC` routes
+and then consume those routes in the frontend.
+
+## Database migration generation
+
+You can generate database migrations by running `task db:generate-migrations`
+
+This command will generate migration files.
+
+ANYTIME YOU MAKE DATABASE SCHEMA CHANGES, YOU MUST GENERATE MIGRATIONS.
+
+You should NEVER edit the generated Drizzle migration files manually UNLESS EXPLICITLY INSTRUCTED TO.
+
+STRIKE TO ALWAYS MAKE BACKWARDS COMPATIBLE CHANGES TO THE DATABASE SCHEMA (i.e. add new columns, but do not remove or change existing columns).
+
+### Drizzle
+
+We are using Drizzle for defining all of our schemas.
+
+We are using **Postgres**. We are using **Postgres**.
+
+### Breaking changes
+
+DO NOT EVER REMOVE COLUMNS OR CHANGE A COLUMN UNLESS EXPLICITLY INSTRUCTUED TO DO SO.
+
+# Code writing rules
+
+Never write obvious comments.
+
+ASSUME THE SERVER IS ALREADY RUNNING -- you do not need to run it ever.
+
+When writing code, always look for `ai-docs.md` files in the directory tree you are working in.
+
+There will most likely be a file somewhere in that tree that will help you write the code more correctly.

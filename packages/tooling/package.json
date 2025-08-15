@@ -1,0 +1,33 @@
+{
+  "name": "@starterp/tooling",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "private": true,
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/bun": "latest",
+    "@types/node": "^24.0.3",
+    "eslint": "^9.29.0",
+    "globals": "^16.2.0",
+    "typescript-eslint": "^8.34.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "lint": "eslint --cache src",
+    "lint:fix": "eslint --cache src --fix",
+    "test": "bun test",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "winston": "^3.17.0"
+  }
+}

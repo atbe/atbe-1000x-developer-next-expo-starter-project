@@ -1,0 +1,35 @@
+{
+  "name": "@starterp/db-migrations",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "drizzle-kit": "drizzle-kit",
+    "migrate": "drizzle-kit migrate",
+    "generate": "drizzle-kit generate",
+    "lint": "eslint --cache src",
+    "lint:fix": "eslint --cache src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.11.6",
+    "drizzle-kit": "^0.31.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@starterp/db": "workspace:*",
+    "@starterp/tooling": "workspace:*",
+    "drizzle-orm": "^0.44.2",
+    "pg": "^8.11.5"
+  }
+}

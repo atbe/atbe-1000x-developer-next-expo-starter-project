@@ -1,0 +1,44 @@
+{
+  "name": "@starterp/api",
+  "module": "src/main.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "wrangler": "^4.20.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@starterp/db": "workspace:*",
+    "@starterp/db-migrations": "workspace:*",
+    "@starterp/models": "workspace:*",
+    "@starterp/tooling": "workspace:*",
+    "@neondatabase/serverless": "^1.0.1",
+    "@supabase/gotrue-js": "^2.71.1",
+    "@supabase/supabase-js": "^2.50.3",
+    "drizzle-orm": "^0.44.2",
+    "inversify": "^7.5.2",
+    "jose": "^6.0.11",
+    "reflect-metadata": "^0.2.2",
+    "stripe": "^18.2.1",
+    "uuid": "^11.1.0",
+    "zod": "^3.25.64"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/main.ts",
+    "dev:openapi": "bun run --watch src/openapi-server-main.ts",
+    "lint": "eslint --cache src",
+    "lint:fix": "eslint --cache src --fix",
+    "test": "bun test",
+    "type-check": "tsc --noEmit",
+    "wranger": "wrangler"
+  }
+}

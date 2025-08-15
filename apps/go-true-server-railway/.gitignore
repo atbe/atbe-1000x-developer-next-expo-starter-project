@@ -1,0 +1,22 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Railway
+.railway
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp 

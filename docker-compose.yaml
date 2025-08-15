@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # we need to create the auth schema in the database on startup, which is used by the GoTrue server
+      - ./scripts/init-auth-schema.sql:/docker-entrypoint-initdb.d/init-auth-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # GoTrue authentication server
+  # Note: We maintain our own auth schema migration (based on the stable 2018 GoTrue schema)
+  # See packages/db/migrations/0001_gotrue_auth_schema.sql
+  gotrue:
+    image: supabase/gotrue:v2.176.1
+    restart: always
+    ports:
+      - 9999:9999
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: "${GOTRUE_DATABASE_URL}"
+      GOTRUE_SITE_URL: "http://localhost:3000"
+      GOTRUE_URI_ALLOW_LIST: "http://localhost:3000/*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_SECRET: "${GOTRUE_JWT_SECRET}"
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: "authenticated"
+      GOTRUE_JWT_CLAIMS_NAMESPACE: "https://starter-project.com/jwt/claims"
+      GOTRUE_JWT_CLAIMS: "roles"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: "true"
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: "http://localhost:9999/callback"
+      API_EXTERNAL_URL: "http://localhost:9999"
+      # CORS configuration
+      GOTRUE_CORS_ALLOWED_HEADERS: "Authorization,X-Client-Info,apikey,Content-Type"
+      GOTRUE_CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+      GOTRUE_CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+      GOTRUE_CORS_MAX_AGE: "604800"
+      # Key used by API server for admin operations (keep secret!)
+      GOTRUE_SERVICE_ROLE_KEY: "${GOTRUE_SERVICE_ROLE_KEY}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    restart: always
+    ports:
+      - "8083:8080"
+    environment:
+      SWAGGER_JSON: /openapi.yaml
+      URL: http://localhost:3043/openapi.json
+
+volumes:
+  postgres_data:

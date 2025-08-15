@@ -1,0 +1,159 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "apps/go-true-server-railway/Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 10,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 20
+  },
+  "envVars": {
+    "PORT": {
+      "default": "9999"
+    },
+    "GOTRUE_SITE_URL": {
+      "required": true,
+      "description": "The base URL of your application (e.g., https://yourapp.com)"
+    },
+    "GOTRUE_URI_ALLOW_LIST": {
+      "required": true,
+      "description": "Comma-separated list of allowed redirect URLs"
+    },
+    "GOTRUE_JWT_SECRET": {
+      "required": true,
+      "description": "Secret used to sign JWT tokens (must be at least 32 characters)"
+    },
+    "GOTRUE_DB_DRIVER": {
+      "default": "postgres",
+      "description": "Database driver (postgres)"
+    },
+    "DATABASE_URL": {
+      "required": true,
+      "description": "PostgreSQL connection string"
+    },
+    "GOTRUE_API_HOST": {
+      "default": "0.0.0.0",
+      "description": "Host to bind the API server to"
+    },
+    "GOTRUE_API_PORT": {
+      "default": "9999",
+      "description": "Port to bind the API server to"
+    },
+    "GOTRUE_DISABLE_SIGNUP": {
+      "default": "false",
+      "description": "Disable new user signups"
+    },
+    "GOTRUE_JWT_EXP": {
+      "default": "3600",
+      "description": "JWT expiration time in seconds"
+    },
+    "GOTRUE_JWT_DEFAULT_GROUP_NAME": {
+      "default": "authenticated",
+      "description": "Default group name for authenticated users"
+    },
+    "GOTRUE_EXTERNAL_EMAIL_ENABLED": {
+      "default": "true",
+      "description": "Enable email authentication"
+    },
+    "GOTRUE_MAILER_AUTOCONFIRM": {
+      "default": "false",
+      "description": "Automatically confirm email addresses"
+    },
+    "GOTRUE_SMTP_HOST": {
+      "description": "SMTP server host"
+    },
+    "GOTRUE_SMTP_PORT": {
+      "default": "587",
+      "description": "SMTP server port"
+    },
+    "GOTRUE_SMTP_USER": {
+      "description": "SMTP username"
+    },
+    "GOTRUE_SMTP_PASS": {
+      "description": "SMTP password"
+    },
+    "GOTRUE_SMTP_SENDER_NAME": {
+      "default": "Just Talk",
+      "description": "Email sender name"
+    },
+    "GOTRUE_SMTP_SENDER": {
+      "description": "Email sender address"
+    },
+    "GOTRUE_MAILER_URLPATHS_INVITE": {
+      "default": "/auth/verify",
+      "description": "Path for invite verification"
+    },
+    "GOTRUE_MAILER_URLPATHS_CONFIRMATION": {
+      "default": "/auth/verify",
+      "description": "Path for email confirmation"
+    },
+    "GOTRUE_MAILER_URLPATHS_RECOVERY": {
+      "default": "/auth/verify",
+      "description": "Path for password recovery"
+    },
+    "GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE": {
+      "default": "/auth/verify",
+      "description": "Path for email change verification"
+    },
+    "GOTRUE_EXTERNAL_GOOGLE_ENABLED": {
+      "default": "false",
+      "description": "Enable Google OAuth"
+    },
+    "GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID": {
+      "description": "Google OAuth client ID"
+    },
+    "GOTRUE_EXTERNAL_GOOGLE_SECRET": {
+      "description": "Google OAuth client secret"
+    },
+    "GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI": {
+      "description": "Google OAuth redirect URI"
+    },
+    "GOTRUE_EXTERNAL_GITHUB_ENABLED": {
+      "default": "false",
+      "description": "Enable GitHub OAuth"
+    },
+    "GOTRUE_EXTERNAL_GITHUB_CLIENT_ID": {
+      "description": "GitHub OAuth client ID"
+    },
+    "GOTRUE_EXTERNAL_GITHUB_SECRET": {
+      "description": "GitHub OAuth client secret"
+    },
+    "GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI": {
+      "description": "GitHub OAuth redirect URI"
+    },
+    "GOTRUE_LOG_LEVEL": {
+      "default": "info",
+      "description": "Log level (debug, info, warn, error)"
+    },
+    "GOTRUE_OPERATOR_TOKEN": {
+      "description": "Admin token for operator endpoints"
+    },
+    "GOTRUE_RATE_LIMIT_HEADER": {
+      "default": "X-Forwarded-For",
+      "description": "Header to use for rate limiting"
+    },
+    "GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED": {
+      "default": "true",
+      "description": "Enable refresh token rotation"
+    },
+    "GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL": {
+      "default": "10",
+      "description": "Refresh token reuse interval in seconds"
+    },
+    "GOTRUE_COOKIE_KEY": {
+      "default": "sb-auth",
+      "description": "Cookie name for auth tokens"
+    },
+    "GOTRUE_COOKIE_DOMAIN": {
+      "description": "Cookie domain"
+    },
+    "API_EXTERNAL_URL": {
+      "required": true,
+      "description": "External URL of the GoTrue service (e.g., https://auth.yourapp.com)"
+    }
+  }
+}

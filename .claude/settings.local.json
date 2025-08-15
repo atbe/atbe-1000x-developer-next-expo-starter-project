@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun run:*)",
+      "Bash(tsc:*)",
+      "Bash(bunx tsc:*)",
+      "Bash(PATH=\"./node_modules/.bin:$PATH\" bun run type-check)",
+      "Bash(task lint:fix:type-check)"
+    ],
+    "deny": []
+  }
+}
