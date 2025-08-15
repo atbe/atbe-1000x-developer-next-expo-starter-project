@@ -10,7 +10,7 @@ is just so good at implementing features. This is because of the structure.
 
 For the best results, you should:
 
-- Use Cursor (it will load the cursor rules which are very important to get the most out of this project). You can use another agentic editor, just be sure to transfer the rules (I will add rule files for Windsurf and Claude Code 🔜).
+- Use Cursor or Claude Code (it will load the cursor rules which are very important to get the most out of this project). You can use another agentic editor, just be sure to transfer the rules (I will add rule files for Windsurf and Claude Code 🔜).
 - Use Claude 4 Opus. It is by far, the best AI code model. OpenAI o3 is also good, but it is very slow (imho).
 
 ## Core Components
