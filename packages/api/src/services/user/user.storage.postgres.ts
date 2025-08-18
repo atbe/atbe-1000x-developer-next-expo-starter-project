@@ -142,7 +142,10 @@ export class UserStoragePostgres implements UserStorageInterface {
     this.logger.debug("Updating user", { user: _user });
     const result = await this.db
       .update(UsersDatabaseSchema)
-      .set(_user)
+      .set({
+        name: _user.name || "",
+        updatedAt: new Date(),
+      })
       .where(eq(UsersDatabaseSchema.id, _user.id));
     this.logger.debug("User updated", { result });
   }
