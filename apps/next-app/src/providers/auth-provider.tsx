@@ -1,3 +1,4 @@
+import { bearer } from 'better-auth/plugins';
 import { createAuthClient } from 'better-auth/react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useSetUserInfo } from '~/hooks/auth/useSetUserInfo';
@@ -42,9 +43,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const authStatus = useAuthStore((state) => state.isAuthenticated);
   const setHasHydrated = useAuthStore((state) => state.setHasHydrated);
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const setUser = useAuthStore((state) => state.updateUser);
   const updateToken = useAuthStore((state) => state.updateToken);
   const logout = useAuthStore((state) => state.logout);
@@ -63,6 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         fetchOptions: {
           credentials: 'include',
         },
+        plugins: [bearer()],
       });
     }
   }, []);
@@ -73,25 +73,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Use better-auth's session monitoring
     const checkSession = async () => {
-      const session = await authClientRef.current!.getSession();
+      try {
+        const session = await authClientRef.current!.getSession();
 
-      if (session.data) {
-        setUser(session.data.user);
-        updateToken(session.data.token || '');
-        setUserInfo();
-      } else if (authStatus && hasHydrated) {
-        logout();
+        if (session.data) {
+          setUser(session.data.user);
+          updateToken(session.data.token || '');
+          setUserInfo();
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
       }
     };
 
-    // Check session on mount and periodically
+    // Check session on mount only
     checkSession();
-    const interval = setInterval(checkSession, 60000); // Check every minute
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [authStatus, hasHydrated, logout, setUser, setUserInfo, updateToken]);
+    // Don't check periodically to avoid loops - better-auth handles this internally
+    // Sessions are checked on each request automatically
+  }, [setUser, setUserInfo, updateToken]);
 
   useEffect(() => {
     // Trigger rehydration on mount
@@ -118,11 +118,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!authClientRef.current)
         throw new Error('Auth client not initialized');
 
-      const response = await authClientRef.current.signUp.email({
-        email,
-        password,
-        name: metadata?.name || '',
-      });
+      const response = await authClientRef.current.signUp.email(
+        {
+          email,
+          password,
+          name: metadata?.name || '',
+        },
+        {
+          onSuccess: (ctx) => {
+            const authToken = ctx.response.headers.get('set-auth-token'); // get the token from the response headers
+            // Store the token securely (e.g., in localStorage)
+            localStorage.setItem('bearer_token', authToken || '');
+          },
+          onError: (error) => {
+            console.error('Error signing up:', error);
+          },
+        },
+      );
 
       if (response.data) {
         setUser(response.data.user);

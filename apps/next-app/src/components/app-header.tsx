@@ -22,12 +22,14 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { useIsAdmin } from '~/hooks/auth/use-roles';
 import { cn } from '~/lib/utils';
+import { useAuth } from '~/providers/auth-provider';
 import { useAuthStore } from '~/stores/auth-store';
 import { trpc } from '~/utils/trpc';
 
 export function AppHeader() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { signOut } = useAuth();
+  const { user } = useAuthStore();
   const isAdmin = useIsAdmin();
 
   // Get user subscription tier
@@ -41,7 +43,7 @@ export function AppHeader() {
   const currentTier = subscription?.tier || 'free';
 
   const handleLogout = () => {
-    logout();
+    signOut();
     router.push('/');
   };
 

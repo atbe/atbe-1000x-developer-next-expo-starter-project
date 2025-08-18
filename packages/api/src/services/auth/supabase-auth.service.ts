@@ -71,8 +71,8 @@ export class SupabaseAuthService implements AuthService {
     }
   }
 
-  async setUserRole(userId: string, roles: string[]): Promise<void> {
-    await this.updateUserMetadata(userId, { roles });
+  async setUserRole(userId: string, role: string): Promise<void> {
+    await this.updateUserMetadata(userId, { role });
   }
 
   /**

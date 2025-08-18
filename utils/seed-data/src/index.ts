@@ -60,7 +60,7 @@ async function seedDatabase() {
       });
 
       // Set admin role
-      await userService.setUserRole(adminUser.id, "admin");
+      await userRoleService.setUserRole(adminUser.id, "admin");
       logger.info("Admin user created successfully", {
         userId: adminUser.id,
       });

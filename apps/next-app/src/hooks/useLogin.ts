@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useAuth } from '~/providers/auth-provider';
-import { useAuthStore } from '~/stores/auth-store';
 
 export interface LoginCredentials {
   email: string;
@@ -17,7 +16,6 @@ export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const authStore = useAuthStore();
   const auth = useAuth();
 
   const login = async (credentials: LoginCredentials): Promise<LoginResult> => {
@@ -25,18 +23,18 @@ export function useLogin() {
     setError(null);
 
     try {
-      // Sign in with GoTrue
-      const { data, error: signInError } = await auth.signIn(
+      // Sign in with better-auth
+      const response = await auth.signIn(
         credentials.email,
         credentials.password,
       );
 
-      if (signInError) {
-        setError(signInError.message || 'Failed to sign in');
-        return { success: false, error: signInError.message };
+      if (response.error) {
+        setError(response.error.message || 'Failed to sign in');
+        return { success: false, error: response.error.message };
       }
 
-      if (!data.user || !data.session) {
+      if (!response.data?.user) {
         setError('Invalid response from authentication service');
         return {
           success: false,
@@ -44,21 +42,8 @@ export function useLogin() {
         };
       }
 
-      // Extract user info and token
-      const user = {
-        id: data.user.id,
-        email: data.user.email!,
-        firstName: data.user.user_metadata?.firstName,
-        lastName: data.user.user_metadata?.lastName,
-        name:
-          data.user.user_metadata?.full_name || data.user.user_metadata?.name,
-        roles: data.user.app_metadata?.roles || [],
-      };
-
-      // Store in auth store
-      authStore.login(user, data.session.access_token);
-
-      // Redirect to intended page
+      // The auth provider will handle setting the user and token
+      // Just redirect to intended page
       const redirectUrl = router.query.redirect as string;
       const destination = redirectUrl || '/dashboard';
       await router.push(destination);
