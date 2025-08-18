@@ -7,15 +7,11 @@ import type { FrontendUser, UserInfo, UserRole } from '@starterp/models';
 export function extractRolesFromUserInfo(
   userInfo: UserInfo | null,
 ): UserRole[] {
-  if (!userInfo?.user?.app_metadata?.roles) {
+  if (!userInfo?.user?.role) {
     return [];
   }
 
-  // Filter to only valid roles
-  const validRoles: UserRole[] = ['user', 'admin'];
-  return userInfo.user.app_metadata.roles.filter((role): role is UserRole =>
-    validRoles.includes(role as UserRole),
-  );
+  return [userInfo.user.role as UserRole];
 }
 
 /**

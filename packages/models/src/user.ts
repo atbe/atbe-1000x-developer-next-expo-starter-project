@@ -18,7 +18,7 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 
 // User with role schema (for frontend/API responses)
 export const userWithRoleSchema = userSchema.extend({
-  roles: z.array(userRoleSchema).default([]),
+  role: userRoleSchema,
 });
 
 export type UserWithRole = z.infer<typeof userWithRoleSchema>;
@@ -54,7 +54,7 @@ export const userInfoSchema = z.object({
     app_metadata: z.object({
       provider: z.string(),
       providers: z.array(z.string()),
-      roles: z.array(z.string()),
+      role: z.string(),
       first_name: z.string().optional(),
       last_name: z.string().optional(),
       full_name: z.string().optional(),

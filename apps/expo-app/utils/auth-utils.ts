@@ -4,18 +4,12 @@ import type { UserInfo, UserRole, FrontendUser } from "@starterp/models";
  * Extract roles from GoTrue user info.
  * Roles are stored in app_metadata.roles array.
  */
-export function extractRolesFromUserInfo(
-  userInfo: UserInfo | null
-): UserRole[] {
-  if (!userInfo?.user?.app_metadata?.roles) {
+export function extractRolesFromUserInfo(userInfo: UserInfo | null): UserRole {
+  if (!userInfo?.user?.role) {
     return [];
   }
 
-  // Filter to only valid roles
-  const validRoles: UserRole[] = ["user", "admin"];
-  return userInfo.user.app_metadata.roles.filter((role): role is UserRole =>
-    validRoles.includes(role as UserRole)
-  );
+  return [userInfo.user.role as UserRole];
 }
 
 /**
@@ -58,7 +52,7 @@ export function extractUserDisplayName(userInfo: UserInfo | null): {
  */
 export function userInfoToFrontendUser(userInfo: UserInfo): FrontendUser {
   const { firstName, lastName, fullName } = extractUserDisplayName(userInfo);
-  const roles = extractRolesFromUserInfo(userInfo);
+  const role = extractRolesFromUserInfo(userInfo);
 
   return {
     id: userInfo.user.id,
@@ -66,7 +60,7 @@ export function userInfoToFrontendUser(userInfo: UserInfo): FrontendUser {
     firstName,
     lastName,
     name: fullName || undefined,
-    roles,
+    role,
   };
 }
 

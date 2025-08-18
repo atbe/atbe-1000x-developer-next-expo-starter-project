@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
-import { useAuthStore } from '~/stores/auth-store';
+import { useAuth } from '~/hooks/use-auth';
 
 interface AuthLinkProps extends Omit<ComponentProps<typeof Link>, 'href'> {
   href: string;
@@ -20,7 +20,7 @@ export function AuthLink({
   children,
   ...props
 }: AuthLinkProps) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
 
   // If authentication is required and user is not authenticated,
   // create a link to login with redirect parameter
