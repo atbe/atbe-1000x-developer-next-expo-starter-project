@@ -9,11 +9,12 @@ import {
   UserStorageInMemory,
   UserStoragePostgres,
 } from "@starterp/api";
-import type {
-  BillingStorageInterface,
-  JwtConfig,
-  SubscriptionStorageInterface,
-  UserStorageInterface,
+import {
+  type BetterAuthConfig,
+  type BillingStorageInterface,
+  type JwtConfig,
+  type SubscriptionStorageInterface,
+  type UserStorageInterface,
 } from "@starterp/models";
 import { Container } from "inversify";
 import "reflect-metadata";
@@ -38,6 +39,12 @@ export function createContainer({
     },
   },
   gotrueServiceRoleKey = process.env.GOTRUE_SERVICE_ROLE_KEY || "fake_default",
+  betterAuthConfig = {
+    secret: process.env.BETTER_AUTH_SECRET || "fake_default",
+    databaseUrl: process.env.DATABASE_URL,
+    baseURL: process.env.BETTER_AUTH_BASE_URL,
+    trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") || [],
+  },
 }: {
   db: DatabaseType;
   useLocal: boolean;
@@ -46,6 +53,7 @@ export function createContainer({
   premiumMonthlyStripeProductId?: string;
   jwtConfig?: JwtConfig;
   gotrueServiceRoleKey?: string;
+  betterAuthConfig?: BetterAuthConfig;
 }) {
   const container = new Container({
     autobind: true,
@@ -82,6 +90,10 @@ export function createContainer({
   container
     .bind<string>(TYPES.GOTRUE_SERVICE_ROLE_KEY)
     .toConstantValue(gotrueServiceRoleKey);
+
+  container
+    .bind<BetterAuthConfig>(TYPES.BETTER_AUTH_CONFIG)
+    .toConstantValue(betterAuthConfig);
 
   container
     .bind<string>(TYPES.StripeSecretKey)

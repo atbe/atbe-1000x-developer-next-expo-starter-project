@@ -28,3 +28,5 @@ export * from "./jwt-config";
 export * from "./cache";
 
 export * from "./auth.service.interface";
+
+export * from "./better-auth-config";

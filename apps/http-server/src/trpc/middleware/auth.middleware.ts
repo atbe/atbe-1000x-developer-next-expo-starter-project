@@ -4,12 +4,38 @@ import type { AuthenticatedContext } from "../context";
 
 // Authentication middleware that transforms Context to AuthenticatedContext
 export const isAuthenticated = middleware(async ({ ctx, next }) => {
+  // First, try to authenticate using better-auth cookies
+  try {
+    const session = await ctx.betterAuthService.auth.api.getSession({
+      headers: ctx.c.req.raw.headers,
+    });
+    
+    if (session?.user) {
+      // Transform better-auth user to JWT payload format for compatibility
+      const user = {
+        id: session.user.id,
+        email: session.user.email,
+        roles: (session.user as any).roles || ["user"],
+      };
+      
+      return next({
+        ctx: {
+          ...ctx,
+          user,
+        } as AuthenticatedContext,
+      });
+    }
+  } catch (_cookieError) {
+    // Cookie auth failed, try Bearer token
+  }
+  
+  // Fallback to Bearer token authentication (for backward compatibility)
   const authHeader = ctx.c.req.header("authorization");
 
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Missing or invalid authorization header",
+      message: "No valid authentication found",
     });
   }
 

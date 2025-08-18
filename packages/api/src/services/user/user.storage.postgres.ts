@@ -19,7 +19,14 @@ export class UserStoragePostgres implements UserStorageInterface {
     this.logger.debug("Creating user", { user });
     const result = await this.db
       .insert(UsersDatabaseSchema)
-      .values(user)
+      .values({
+        id: user.id,
+        email: user.email,
+        name: user.name ?? "",
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        stripeCustomerId: user.stripeCustomerId,
+      })
       .returning();
     this.logger.debug("User created", { result });
 
@@ -156,6 +163,9 @@ export class UserStoragePostgres implements UserStorageInterface {
       .insert(UsersDatabaseSchema)
       .values({
         id: user.id,
+        email: user.email,
+        name: "",
+        createdAt: new Date(),
       })
       .onConflictDoUpdate({
         target: UsersDatabaseSchema.id,
@@ -184,6 +194,34 @@ export class UserStoragePostgres implements UserStorageInterface {
       createdAt: upsertedUser.createdAt,
       updatedAt: upsertedUser.updatedAt,
       stripeCustomerId: upsertedUser.stripeCustomerId,
+    };
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    this.logger.debug("Getting user by email", { email });
+    const result = await this.db
+      .select()
+      .from(UsersDatabaseSchema)
+      .where(eq(UsersDatabaseSchema.email, email));
+
+    if (result.length === 0) {
+      this.logger.debug("User not found", { email });
+      return null;
+    }
+
+    const user = result[0];
+    if (!user) {
+      this.logger.debug("User not found", { email });
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      stripeCustomerId: user.stripeCustomerId,
+      name: user.name,
     };
   }
 }

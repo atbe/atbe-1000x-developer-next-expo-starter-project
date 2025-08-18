@@ -31,15 +31,15 @@ export class AdminStorage {
     if (search) {
       // Count with search - join with GoTrue users table
       const result = await this.db.execute(
-        sql`SELECT count(*) FROM app.users 
-            LEFT JOIN auth.users ON app.users.id = auth.users.id 
-            WHERE auth.users.email ILIKE ${`%${search}%`}`
+        sql`SELECT count(*) FROM users 
+            LEFT JOIN users ON users.id = users.id 
+            WHERE users.email ILIKE ${`%${search}%`}`
       );
 
       return Number((result as any)[0]?.count || 0);
     } else {
       // Count all users - no join needed
-      const result = await this.db.execute(sql`SELECT count(*) FROM app.users`);
+      const result = await this.db.execute(sql`SELECT count(*) FROM users`);
 
       return Number((result as any)[0]?.count || 0);
     }

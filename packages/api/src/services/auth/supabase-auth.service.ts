@@ -1,14 +1,12 @@
 // Using the GoTrue SDK instead of direct HTTP calls for better safety and reliability
 
-import type { Logger } from "@starterp/tooling";
-import { inject, injectable } from "inversify";
-import { GoTrueClient } from "@supabase/gotrue-js";
-import { getLogger } from "../../utils/getLogger";
 import type { AuthService } from "@starterp/models";
+import type { Logger } from "@starterp/tooling";
+import { GoTrueClient } from "@supabase/gotrue-js";
+import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import type { DatabaseType } from "../../types/database";
-import { GoTrueUsersDatabaseSchema } from "@starterp/db";
-import { eq } from "drizzle-orm";
+import { getLogger } from "../../utils/getLogger";
 
 /**
  * SupabaseAuthService communicates with the GoTrue authentication service.
@@ -73,7 +71,7 @@ export class SupabaseAuthService implements AuthService {
     }
   }
 
-  async setUserRoles(userId: string, roles: string[]): Promise<void> {
+  async setUserRole(userId: string, roles: string[]): Promise<void> {
     await this.updateUserMetadata(userId, { roles });
   }
 
@@ -162,46 +160,6 @@ export class SupabaseAuthService implements AuthService {
       }
     } catch (error) {
       this.logger.error("Failed to ensure user", { error, email, userId });
-      throw error;
-    }
-  }
-
-  /**
-   * Get user by email using direct database query.
-   * This is much more efficient than using GoTrue's listUsers API.
-   */
-  async getUserByEmail(
-    email: string
-  ): Promise<{ id: string; email: string } | null> {
-    try {
-      // Direct database query - much more efficient!
-      const result = await this.db
-        .select({
-          id: GoTrueUsersDatabaseSchema.id,
-          email: GoTrueUsersDatabaseSchema.email,
-        })
-        .from(GoTrueUsersDatabaseSchema)
-        .where(eq(GoTrueUsersDatabaseSchema.email, email))
-        .limit(1);
-
-      if (result.length === 0) {
-        return null;
-      }
-
-      const user = result[0];
-      if (!user) {
-        return null;
-      }
-
-      return {
-        id: user.id,
-        email: user.email,
-      };
-    } catch (error) {
-      this.logger.error("Failed to get user by email from database", {
-        error,
-        email,
-      });
       throw error;
     }
   }

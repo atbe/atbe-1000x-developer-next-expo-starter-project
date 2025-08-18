@@ -1,14 +1,10 @@
-import {
-  type AuthChangeEvent,
-  GoTrueClient,
-  type Session,
-} from '@supabase/gotrue-js';
+import { createAuthClient } from 'better-auth/react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useSetUserInfo } from '~/hooks/auth/useSetUserInfo';
 import { useAuthStore } from '~/stores/auth-store';
 
 interface AuthContextValue {
-  client: GoTrueClient | null;
+  client: ReturnType<typeof createAuthClient> | null;
   signUp: (
     email: string,
     password: string,
@@ -19,7 +15,7 @@ interface AuthContextValue {
   signOut: () => Promise<any>;
   getSession: () => Promise<any>;
   getUser: () => Promise<any>;
-  refreshSession: () => Promise<any>;
+  useSession: () => any;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -30,7 +26,7 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => ({}),
   getSession: async () => ({}),
   getUser: async () => ({}),
-  refreshSession: async () => ({}),
+  useSession: () => null,
 });
 
 export const useAuth = () => {
@@ -54,63 +50,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useAuthStore((state) => state.logout);
   const setUserInfo = useSetUserInfo();
 
-  const goTrueClientRef = useRef<GoTrueClient | null>(null);
+  const authClientRef = useRef<ReturnType<typeof createAuthClient> | null>(
+    null,
+  );
 
-  // Initialize GoTrue client
+  // Initialize Better Auth client
   useEffect(() => {
-    if (!goTrueClientRef.current) {
-      goTrueClientRef.current = new GoTrueClient({
-        url: process.env.NEXT_PUBLIC_GOTRUE_URL || 'http://localhost:9999',
-        headers: {
-          apikey: process.env.NEXT_PUBLIC_GOTRUE_ANON_KEY || '',
+    if (!authClientRef.current) {
+      authClientRef.current = createAuthClient({
+        baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3042',
+        basePath: '/api/auth',
+        fetchOptions: {
+          credentials: 'include',
         },
-        storageKey: 'gotrue-auth-token',
-        detectSessionInUrl: true,
-        flowType: 'pkce',
-        autoRefreshToken: true,
       });
     }
   }, []);
 
+  // Listen for auth state changes
   useEffect(() => {
-    if (!goTrueClientRef.current) return;
+    if (!authClientRef.current) return;
 
-    const { data: subscription } = goTrueClientRef.current.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
-        if (!session) {
-          return;
-        }
+    // Use better-auth's session monitoring
+    const checkSession = async () => {
+      const session = await authClientRef.current!.getSession();
 
-        switch (event) {
-          case 'SIGNED_IN': {
-            setUser(session?.user);
-            updateToken(session?.access_token || '');
-            setUserInfo();
-            return;
-          }
-          case 'TOKEN_REFRESHED': {
-            updateToken(session?.access_token || '');
-            setUserInfo();
-            return;
-          }
-          case 'SIGNED_OUT': {
-            logout();
-            return;
-          }
-          default: {
-            break;
-          }
-        }
+      if (session.data) {
+        setUser(session.data.user);
+        updateToken(session.data.token || '');
+        setUserInfo();
+      } else if (authStatus && hasHydrated) {
+        logout();
+      }
+    };
 
-        if (!session && authStatus && hasHydrated) {
-          logout();
-          return;
-        }
-      },
-    );
+    // Check session on mount and periodically
+    checkSession();
+    const interval = setInterval(checkSession, 60000); // Check every minute
 
     return () => {
-      subscription.subscription.unsubscribe();
+      clearInterval(interval);
     };
   }, [authStatus, hasHydrated, logout, setUser, setUserInfo, updateToken]);
 
@@ -129,66 +108,88 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [setHasHydrated, setUserInfo]);
 
   const authMethods: AuthContextValue = {
-    client: goTrueClientRef.current,
+    client: authClientRef.current,
 
     signUp: async (
       email: string,
       password: string,
       metadata?: Record<string, any>,
     ) => {
-      if (!goTrueClientRef.current)
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.signUp({
+
+      const response = await authClientRef.current.signUp.email({
         email,
         password,
-        options: {
-          data: metadata,
-        },
+        name: metadata?.name || '',
       });
+
+      if (response.data) {
+        setUser(response.data.user);
+        updateToken(response.data.token || '');
+        setUserInfo();
+      }
+
+      return response;
     },
 
     signIn: async (email: string, password: string) => {
-      if (!goTrueClientRef.current)
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.signInWithPassword({
+
+      const response = await authClientRef.current.signIn.email({
         email,
         password,
       });
+
+      if (response.data) {
+        setUser(response.data.user);
+        updateToken(response.data.token || '');
+        setUserInfo();
+      }
+
+      return response;
     },
 
     signInWithGoogle: async () => {
-      if (!goTrueClientRef.current)
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.signInWithOAuth({
+
+      await authClientRef.current.signIn.social({
         provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+        callbackURL: `${window.location.origin}/auth/callback`,
       });
     },
 
     signOut: async () => {
-      if (!goTrueClientRef.current)
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.signOut();
+
+      const response = await authClientRef.current.signOut();
+      logout();
+      return response;
     },
 
     getSession: async () => {
-      if (!goTrueClientRef.current)
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.getSession();
+
+      return authClientRef.current.getSession();
     },
 
     getUser: async () => {
-      if (!goTrueClientRef.current)
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.getUser();
+
+      const session = await authClientRef.current.getSession();
+      return session.data?.user || null;
     },
 
-    refreshSession: async () => {
-      if (!goTrueClientRef.current)
+    useSession: () => {
+      if (!authClientRef.current)
         throw new Error('Auth client not initialized');
-      return goTrueClientRef.current.refreshSession();
+
+      return authClientRef.current.useSession();
     },
   };
 

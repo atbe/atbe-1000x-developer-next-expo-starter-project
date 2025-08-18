@@ -11,3 +11,6 @@ export {
 
 // Export pre-defined aliases
 export { AuthUsers } from "./aliases";
+export { appSchema } from "./schema/AppSchema.drizzle";
+
+export { users as UsersDatabaseSchema } from "./better-auth-schema/schema";

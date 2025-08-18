@@ -110,7 +110,7 @@ export const trpc = createTRPCNext<AppRouter, SSRContext>({
            * @see https://trpc.io/docs/v11/ssr
            */
           headers() {
-            // Get auth headers
+            // Get auth headers (optional, as better-auth uses cookies)
             const authHeaders =
               typeof window !== 'undefined' ? getTRPCAuthHeaders() : {};
 
@@ -128,7 +128,18 @@ export const trpc = createTRPCNext<AppRouter, SSRContext>({
             return {
               ...headers,
               ...authHeaders,
+              // Ensure cookies are forwarded for SSR
+              cookie: headers.cookie || '',
             };
+          },
+          /**
+           * Enable sending cookies with requests (important for better-auth)
+           */
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            });
           },
           /**
            * @see https://trpc.io/docs/v11/data-transformers

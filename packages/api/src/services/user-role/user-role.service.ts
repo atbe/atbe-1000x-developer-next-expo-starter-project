@@ -5,7 +5,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../../di/types";
 import type { UserRoleStorage } from "../../services/user-role/user-role.storage";
 import { getLogger } from "../../utils/getLogger";
-import { SupabaseAuthService } from "../auth/supabase-auth.service";
+import { BetterAuthService } from "../auth/better-auth.service";
 
 @injectable()
 export class UserRoleService {
@@ -14,7 +14,7 @@ export class UserRoleService {
   constructor(
     @inject(TYPES.UserRoleStorage)
     private readonly userRoleStorage: UserRoleStorage,
-    @inject(SupabaseAuthService)
+    @inject(BetterAuthService)
     private readonly authService: AuthService
   ) {
     this.logger = getLogger("UserRoleService");
@@ -44,71 +44,22 @@ export class UserRoleService {
     role: UserRole,
     actorId?: string
   ): Promise<void> {
-    this.logger.info("Setting user role", { userId, role, actorId });
-    const existingRole = await this.userRoleStorage.getUserRoleRecord(userId);
+    // Create new role record
+    this.logger.info("Creating new role record", { userId, role });
+    const roleId = await this.userRoleStorage.createUserRole(userId, role);
+    this.logger.info("New role record created", { roleId });
 
-    if (existingRole) {
-      if (existingRole.role === role) {
-        this.logger.info("User role already set to the desired role", {
-          userId,
-          role,
-        });
-        return;
-      }
-      // Update existing role
-      const previousRole = existingRole.role;
-      this.logger.info("Updating user role", {
-        userId,
+    // Log the event
+    await this.userRoleStorage.logSystemEvent({
+      eventType: "user_role_created",
+      userId,
+      roleId,
+      properties: { role },
+      actorId: actorId || userId,
+      description: this.generateEventDescription("user_role_created", {
         role,
-        previousRole,
-      });
-      await this.userRoleStorage.updateUserRole(userId, role);
-
-      // Sync all roles to auth provider
-      const roleRecords = await this.userRoleStorage.getRolesForUser(userId);
-      this.logger.info("Role records", { roleRecords });
-      const roles = roleRecords.map((r) => r.role as string);
-      await this.authService.setUserRoles(userId, roles);
-      this.logger.info("Roles synced to auth provider", { roles });
-
-      // Log the event
-
-      await this.userRoleStorage.logSystemEvent({
-        eventType: "user_role_created",
-        userId,
-        roleId: existingRole.id,
-        properties: { previousRole, newRole: role },
-        actorId: actorId || userId,
-        description: this.generateEventDescription("user_role_updated", {
-          previousRole,
-          newRole: role,
-        }),
-      });
-    } else {
-      // Create new role record
-      this.logger.info("Creating new role record", { userId, role });
-      const roleId = await this.userRoleStorage.createUserRole(userId, role);
-      this.logger.info("New role record created", { roleId });
-
-      // Sync all roles
-      const roleRecords = await this.userRoleStorage.getRolesForUser(userId);
-      this.logger.info("Role records", { roleRecords });
-      const roles = roleRecords.map((r) => r.role as string);
-      await this.authService.setUserRoles(userId, roles);
-      this.logger.info("Roles synced to auth provider", { roles });
-
-      // Log the event
-      await this.userRoleStorage.logSystemEvent({
-        eventType: "user_role_created",
-        userId,
-        roleId,
-        properties: { role },
-        actorId: actorId || userId,
-        description: this.generateEventDescription("user_role_created", {
-          role,
-        }),
-      });
-    }
+      }),
+    });
   }
 
   /**
@@ -132,51 +83,6 @@ export class UserRoleService {
       createdAt: role.createdAt,
       updatedAt: role.updatedAt,
     }));
-  }
-
-  /**
-   * Remove a given role from user (cannot remove "user")
-   */
-  async removeUserRole(
-    userId: string,
-    role: UserRole,
-    actorId?: string
-  ): Promise<void> {
-    if (role === "user") {
-      this.logger.warn("Attempt to remove protected 'user' role ignored", {
-        userId,
-      });
-      return;
-    }
-
-    // Check existing record first
-    const existingRole = await this.userRoleStorage.getUserRoleRecordByRole(
-      userId,
-      role
-    );
-    if (!existingRole) {
-      this.logger.warn("Role not found for user", { userId, role });
-      return;
-    }
-
-    await this.userRoleStorage.deleteUserRole(userId, role);
-
-    // Log event
-    await this.userRoleStorage.logSystemEvent({
-      eventType: "user_role_removed",
-      userId,
-      roleId: existingRole.id,
-      properties: { removedRole: role },
-      actorId: actorId || userId,
-      description: this.generateEventDescription("user_role_removed", {
-        removedRole: role,
-      }),
-    });
-
-    // Sync remaining roles
-    const roleRecords = await this.userRoleStorage.getRolesForUser(userId);
-    const roles = roleRecords.map((r) => r.role as string);
-    await this.authService.setUserRoles(userId, roles);
   }
 
   /**

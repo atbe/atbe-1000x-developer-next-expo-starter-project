@@ -31,6 +31,7 @@ async function seedDatabase() {
     logger.info("App initialized");
 
     // Check if admin user already exists
+    logger.info("Checking if admin user already exists...");
     const existingAdminUser = await userService.getUserByEmail(
       "welcome@starterp.com"
     );
@@ -59,7 +60,7 @@ async function seedDatabase() {
       });
 
       // Set admin role
-      await userRoleService.setUserRole(adminUser.id, "admin");
+      await userService.setUserRole(adminUser.id, "admin");
       logger.info("Admin user created successfully", {
         userId: adminUser.id,
       });

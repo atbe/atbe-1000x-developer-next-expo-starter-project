@@ -38,6 +38,11 @@ declare global {
       DATABASE_URL: string;
       USE_WORKERS_DB?: "true" | "false";
 
+      // BetterAuth
+      BETTER_AUTH_BASE_URL: string;
+      BETTER_AUTH_SECRET: string;
+      BETTER_AUTH_TRUSTED_ORIGINS?: string;
+
       // Stripe
       STRIPE_SECRET_KEY: string;
       STRIPE_WEBHOOK_SECRET?: string;

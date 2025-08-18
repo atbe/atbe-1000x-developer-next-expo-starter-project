@@ -6,6 +6,10 @@ export const TYPES = {
   BillingStorage: Symbol("BillingStorage"),
   SubscriptionStorage: Symbol("SubscriptionStorage"),
 
+  // Auth
+  AuthService: Symbol("AuthService"),
+  BetterAuthService: Symbol("BetterAuthService"),
+
   // Stripe
   StripeSecretKey: Symbol("StripeSecretKey"),
   PremiumMonthlyStripeProductId: Symbol("PremiumMonthlyStripeProductId"),
@@ -19,4 +23,7 @@ export const TYPES = {
   // JWT
   JWT_CONFIG: Symbol("JWT_CONFIG"),
   GOTRUE_SERVICE_ROLE_KEY: Symbol("GOTRUE_SERVICE_ROLE_KEY"),
+
+  // Better Auth
+  BETTER_AUTH_CONFIG: Symbol("BETTER_AUTH_CONFIG"),
 };

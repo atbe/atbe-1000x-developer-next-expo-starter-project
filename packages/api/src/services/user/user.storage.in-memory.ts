@@ -50,4 +50,12 @@ export class UserStorageInMemory implements UserStorageInterface {
       updatedAt: new Date(),
     });
   }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return (
+      this.users.find(
+        (user) => user.email.toLowerCase() === email.toLowerCase()
+      ) ?? null
+    );
+  }
 }

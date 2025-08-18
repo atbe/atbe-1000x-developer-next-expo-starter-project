@@ -1,9 +1,15 @@
-import { jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { appSchema } from "./AppSchema.drizzle";
-import { UsersDatabaseSchema } from "./User.drizzle";
+import {
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { users } from "../better-auth-schema/schema";
 
 // Enum for billing event types - includes all common Stripe webhook event types
-export const billingEventTypeEnum = appSchema.enum("billing_event_type", [
+export const billingEventTypeEnum = pgEnum("billing_event_type", [
   // Account events
   "account.updated",
   "account.application.authorized",
@@ -148,17 +154,17 @@ export const billingEventTypeEnum = appSchema.enum("billing_event_type", [
 ]);
 
 // Enum for billing event status
-export const billingEventStatusEnum = appSchema.enum("billing_event_status", [
+export const billingEventStatusEnum = pgEnum("billing_event_status", [
   "pending",
   "processed",
   "failed",
   "ignored",
 ]);
 
-export const BillingEventsDatabaseSchema = appSchema.table("billing_events", {
+export const BillingEventsDatabaseSchema = pgTable("billing_events", {
   id: uuid("id").primaryKey(),
   stripeEventId: text("stripe_event_id").notNull().unique(),
-  userId: uuid("user_id").references(() => UsersDatabaseSchema.id, {
+  userId: uuid("user_id").references(() => users.id, {
     onDelete: "set null",
   }),
   stripeCustomerId: text("stripe_customer_id"),

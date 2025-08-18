@@ -54,7 +54,8 @@ export const useAuthStore = create<AuthState>()(
 
       updateUser: (userData) => {
         set((state) => ({
-          user: state.user ? { ...state.user, ...userData } : null,
+          user: state.user ? { ...state.user, ...userData } : userData as FrontendUser,
+          isAuthenticated: true,
         }));
       },
 

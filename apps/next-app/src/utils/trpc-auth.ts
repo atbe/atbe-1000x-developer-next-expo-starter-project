@@ -1,19 +1,21 @@
 import { useAuthStore } from '~/stores/auth-store';
 
 // Helper to get auth headers for tRPC
+// Better-auth uses cookies for session management, so we don't need to manually add headers
+// But we'll keep this for backward compatibility and potential Bearer token usage
 export const getTRPCAuthHeaders = () => {
-  // Try to get from store first, then from localStorage
-  const goTrueToken = localStorage.getItem('gotrue-auth-token');
-  if (goTrueToken) {
-    const parsedToken: {
-      access_token: string;
-    } = JSON.parse(goTrueToken);
+  // Better-auth uses httpOnly cookies by default, which are automatically sent
+  // We can optionally include the token from the store if needed for Bearer auth
+  const token = useAuthStore.getState().token;
+  
+  if (token) {
     return {
-      authorization: `Bearer ${parsedToken.access_token}`,
+      authorization: `Bearer ${token}`,
     };
-  } else {
-    return {};
   }
+  
+  // Return empty headers - cookies will be sent automatically
+  return {};
 };
 
 // Helper to handle auth errors in tRPC

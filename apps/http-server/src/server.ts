@@ -1,5 +1,5 @@
 import { trpcServer } from "@hono/trpc-server";
-import { BillingService, getLogger } from "@starterp/api";
+import { BetterAuthService, BillingService, getLogger } from "@starterp/api";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { Container } from "inversify";
@@ -24,7 +24,17 @@ export function createServer(container: Container) {
     return c.json({ error: "Internal server error" }, 500) as Response;
   });
 
-  server.use("/*", cors());
+  server.use(
+    "/*",
+    cors({
+      origin: "http://localhost:3000", // replace with your origin
+      allowHeaders: ["Content-Type", "Authorization"],
+      allowMethods: ["POST", "GET", "OPTIONS"],
+      exposeHeaders: ["Content-Length"],
+      maxAge: 600,
+      credentials: true,
+    })
+  );
 
   server.get("/health", (c) => {
     return c.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -99,6 +109,11 @@ export function createServer(container: Container) {
       return c.json({ error: "Webhook processing failed" }, 500);
     }
   });
+
+  const auth = container.get(BetterAuthService);
+  server.on(["POST", "GET"], "/api/auth/**", (c) =>
+    auth.getAuth().handler(c.req.raw)
+  );
 
   server.use(
     "/trpc/*",

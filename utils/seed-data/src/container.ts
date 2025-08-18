@@ -10,6 +10,7 @@ import {
   UserStoragePostgres,
 } from "@starterp/api";
 import type {
+  BetterAuthConfig,
   BillingStorageInterface,
   JwtConfig,
   SubscriptionStorageInterface,
@@ -32,7 +33,14 @@ export function createContainer({
     audience: "starterp-api",
   },
   gotrueServiceRoleKey = process.env.GOTRUE_SERVICE_ROLE_KEY || "fake_default",
-  usageCacheTimeoutMs = 60000, // Default 1 minute
+  betterAuthConfig = {
+    secret: process.env.BETTER_AUTH_SECRET || "fake_default",
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    databaseUrl: process.env.DATABASE_URL!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    baseURL: process.env.BETTER_AUTH_BASE_URL!,
+    trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") || [],
+  },
 }: {
   db: DatabaseType;
   useLocal: boolean;
@@ -40,7 +48,7 @@ export function createContainer({
   premiumMonthlyStripeProductId?: string;
   jwtConfig?: JwtConfig;
   gotrueServiceRoleKey?: string;
-  usageCacheTimeoutMs?: number;
+  betterAuthConfig?: BetterAuthConfig;
 }) {
   const container = new Container({
     autobind: true,
@@ -82,6 +90,10 @@ export function createContainer({
   container
     .bind<string>(TYPES.StripeSecretKey)
     .toConstantValue(stripeSecretKey);
+
+  container
+    .bind<BetterAuthConfig>(TYPES.BETTER_AUTH_CONFIG)
+    .toConstantValue(betterAuthConfig);
 
   container
     .bind<string>(TYPES.PremiumMonthlyStripeProductId)

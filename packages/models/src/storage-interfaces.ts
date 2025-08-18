@@ -87,6 +87,7 @@ export const billingStorageMethodsSchema = z.object({
 export interface UserStorageInterface {
   createUser(user: User): Promise<User>;
   getUserById(id: string): Promise<User | null>;
+  getUserByEmail(email: string): Promise<User | null>;
   getUserByStripeCustomerId(stripeCustomerId: string): Promise<User | null>;
   updateUser(user: User): Promise<void>;
   deleteUser(id: string): Promise<void>;

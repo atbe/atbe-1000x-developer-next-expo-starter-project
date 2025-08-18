@@ -18,4 +18,5 @@ export * from "./billing/billing.service";
 export * from "./billing/billing.storage.in-memory";
 export * from "./billing/billing.storage.postgres";
 export * from "./auth/supabase-auth.service";
+export * from "./auth/better-auth.service";
 export * from "./app-config.service";

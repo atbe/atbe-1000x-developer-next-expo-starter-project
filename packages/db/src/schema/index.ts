@@ -7,7 +7,6 @@ export {
   SystemEventsDatabaseSchema,
   systemEventTypeEnum,
 } from "./SystemEvent.drizzle";
-export { UsersDatabaseSchema } from "./User.drizzle";
 export {
   convertStringToUserRole,
   createUserRoleSchema,
@@ -22,5 +21,12 @@ export {
   type UserRole,
   type UserRoleRecord,
 } from "./UserRole.drizzle";
+
+export {
+  users,
+  sessions,
+  accounts,
+  verifications,
+} from "../better-auth-schema/schema";
 
 // Make entities available on schema

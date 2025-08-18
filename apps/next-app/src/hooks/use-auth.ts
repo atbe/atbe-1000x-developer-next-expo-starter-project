@@ -1,21 +1,12 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useAuthStore } from '~/stores/auth-store';
+import { useAuth as useAuthContext } from '~/providers/auth-provider';
 
 export const useAuth = () => {
   const router = useRouter();
   const authStore = useAuthStore();
-
-  // Check if token is expired
-  const isTokenExpired = (token: string): boolean => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() > exp;
-    } catch {
-      return true;
-    }
-  };
+  const authContext = useAuthContext();
 
   // Get auth headers for API requests
   const getAuthHeaders = (): Record<string, string> => {
@@ -28,24 +19,27 @@ export const useAuth = () => {
   };
 
   // Handle logout and redirect
-  const handleLogout = (redirectTo = '/') => {
-    authStore.logout();
+  const handleLogout = async (redirectTo = '/') => {
+    await authContext.signOut();
     router.push(redirectTo);
   };
 
-  // Check auth status on mount and token changes
+  // Check auth status on mount
   useEffect(() => {
-    const { token, logout } = authStore;
-
-    if (token && isTokenExpired(token)) {
-      logout();
-      router.push('/login');
-    }
-  }, [authStore, authStore.token, router]);
+    const checkAuth = async () => {
+      const session = await authContext.getSession();
+      if (!session?.data && authStore.isAuthenticated) {
+        authStore.logout();
+        router.push('/login');
+      }
+    };
+    
+    checkAuth();
+  }, [authContext, authStore, router]);
 
   return {
     ...authStore,
-    isTokenExpired,
+    ...authContext,
     getAuthHeaders,
     handleLogout,
   };

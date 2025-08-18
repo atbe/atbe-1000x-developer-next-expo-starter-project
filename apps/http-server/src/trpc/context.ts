@@ -1,6 +1,7 @@
 import {
   AdminService,
   AppConfigService,
+  BetterAuthService,
   BillingService,
   getLogger,
   JWTService,
@@ -23,6 +24,7 @@ export type Context = {
   logger: Logger;
 
   adminService: AdminService;
+  betterAuthService: BetterAuthService;
   jwtService: JWTService;
   userService: UserService;
   userRoleService: UserRoleService;
@@ -47,6 +49,7 @@ export type AuthenticatedContext = Context & {
  */
 export function createContext(c: HonoContext, container: Container): Context {
   const adminService = container.get(AdminService);
+  const betterAuthService = container.get(BetterAuthService);
   const jwtService = container.get(JWTService);
   const userService = container.get(UserService);
   const userRoleService = container.get(UserRoleService);
@@ -59,6 +62,7 @@ export function createContext(c: HonoContext, container: Container): Context {
     logger: getLogger("TRPCContext"),
 
     adminService,
+    betterAuthService,
     jwtService,
     userService,
     userRoleService,

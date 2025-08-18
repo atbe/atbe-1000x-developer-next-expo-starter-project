@@ -17,13 +17,14 @@
     }
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
     "@starterp/db": "workspace:*",
     "@starterp/db-migrations": "workspace:*",
     "@starterp/models": "workspace:*",
     "@starterp/tooling": "workspace:*",
-    "@neondatabase/serverless": "^1.0.1",
     "@supabase/gotrue-js": "^2.71.1",
     "@supabase/supabase-js": "^2.50.3",
+    "better-auth": "^1.3.7",
     "drizzle-orm": "^0.44.2",
     "inversify": "^7.5.2",
     "jose": "^6.0.11",

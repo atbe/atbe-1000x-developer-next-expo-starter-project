@@ -1,11 +1,10 @@
 import type { AuthService, User, UserStorageInterface } from "@starterp/models";
 import type { Logger } from "@starterp/tooling";
 import { inject, injectable } from "inversify";
-import { v4 as uuidv4 } from "uuid";
 import { TYPES } from "../../di/types";
 import { UserRoleService } from "../../services/user-role/user-role.service";
 import { getLogger } from "../../utils/getLogger";
-import { SupabaseAuthService } from "../auth/supabase-auth.service";
+import { BetterAuthService } from "../auth/better-auth.service";
 
 @injectable()
 export class UserService {
@@ -16,7 +15,7 @@ export class UserService {
     private readonly userStorage: UserStorageInterface,
     @inject(UserRoleService)
     private readonly userRoleService: UserRoleService,
-    @inject(SupabaseAuthService)
+    @inject(BetterAuthService)
     private readonly authService: AuthService
   ) {
     this.logger = getLogger("UserService");
@@ -34,76 +33,41 @@ export class UserService {
     lastName?: string;
     id?: string;
   }): Promise<User> {
-    const newId = user.id ?? uuidv4();
     this.logger.info("Creating user profile", {
       email: user.email,
-      id: newId,
       firstName: user.firstName,
       lastName: user.lastName,
     });
 
-    // Ensure underlying auth provider user exists (creates if missing)
-    const { id: authId } = await this.authService.ensureUser(
+    const existingUser = await this.getUserByEmail(user.email);
+
+    if (existingUser) {
+      this.logger.info("User already exists", {
+        email: user.email,
+        id: existingUser.id,
+      });
+      return existingUser;
+    }
+
+    const { id: newId } = await this.authService.ensureUser(
       user.email,
       user.password,
-      newId, // Pass the ID if we have it, undefined otherwise
+      user.id,
       user.firstName,
       user.lastName
     );
-    if (authId !== newId) {
-      this.logger.error("Auth ID mismatch", { authId, newId });
-      throw new Error("Auth ID mismatch");
-    }
 
-    await this.authService.updateUserMetadata(authId, {
-      full_name: `${user.firstName} ${user.lastName}`,
+    return {
+      id: newId,
+      email: user.email,
       name: `${user.firstName} ${user.lastName}`,
-    });
-
-    try {
-      this.logger.info("Inserting into storage", {
-        email: user.email,
-        id: newId,
-      });
-      const newUser = await this.userStorage.createUser({
-        id: newId,
-        email: user.email,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-      this.logger.info("User profile created", { user: newUser });
-      return newUser;
-    } catch (error) {
-      this.logger.error("Error creating user profile", { error });
-      throw error;
-    }
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
   }
 
   async updateUser(user: User): Promise<void> {
     return await this.userStorage.updateUser(user);
-  }
-
-  async getUserByEmail(email: string): Promise<User | null> {
-    this.logger.info("Getting user by email", { email });
-
-    // Get user from auth provider (now uses efficient database query)
-    const authUser = await this.authService.getUserByEmail(email);
-    if (!authUser) {
-      this.logger.debug("User not found in auth provider", { email });
-      return null;
-    }
-
-    // Get user profile from our database
-    const user = await this.userStorage.getUserById(authUser.id);
-    if (!user) {
-      this.logger.debug("User profile not found in database", {
-        email,
-        authId: authUser.id,
-      });
-      return null;
-    }
-
-    return user;
   }
 
   async verifyPassword(email: string, password: string): Promise<boolean> {
@@ -131,5 +95,9 @@ export class UserService {
       this.logger.error("Error upserting OAuth user", { error });
       throw error;
     }
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return await this.userStorage.getUserByEmail(email);
   }
 }
