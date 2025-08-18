@@ -1,8 +1,7 @@
 import {
-  AuthUsers,
-  GoTrueUsersDatabaseSchema,
   SubscriptionsDatabaseSchema,
   UserRolesDatabaseSchema,
+  users,
   UsersDatabaseSchema,
 } from "@starterp/db";
 import type { Logger } from "@starterp/tooling";
@@ -57,13 +56,12 @@ export class AdminStorage {
       .select({
         id: UsersDatabaseSchema.id,
         createdAt: UsersDatabaseSchema.createdAt,
-        email: sql<string>`coalesce(${AuthUsers.email}, '')`,
+        email: sql<string>`coalesce(${users.email}, '')`,
         updatedAt: UsersDatabaseSchema.updatedAt,
         roleData: UserRolesDatabaseSchema.role,
         subscriptionData: SubscriptionsDatabaseSchema.tier,
       })
       .from(UsersDatabaseSchema)
-      .leftJoin(AuthUsers, eq(UsersDatabaseSchema.id, AuthUsers.id))
       .leftJoin(
         UserRolesDatabaseSchema,
         eq(UsersDatabaseSchema.id, UserRolesDatabaseSchema.userId)
@@ -74,7 +72,9 @@ export class AdminStorage {
       );
 
     if (search) {
-      return await initialQuery.where(like(AuthUsers.email, `%${search}%`));
+      return await initialQuery.where(
+        like(UsersDatabaseSchema.email, `%${search}%`)
+      );
     }
 
     return await initialQuery
@@ -90,16 +90,12 @@ export class AdminStorage {
     const results = await this.db
       .select({
         id: UsersDatabaseSchema.id,
-        email: sql<string>`coalesce(${GoTrueUsersDatabaseSchema.email}, '')`,
+        email: sql<string>`coalesce(${users.email}, '')`,
         createdAt: UsersDatabaseSchema.createdAt,
         updatedAt: UsersDatabaseSchema.updatedAt,
         stripeCustomerId: UsersDatabaseSchema.stripeCustomerId,
       })
       .from(UsersDatabaseSchema)
-      .leftJoin(
-        GoTrueUsersDatabaseSchema,
-        eq(UsersDatabaseSchema.id, GoTrueUsersDatabaseSchema.id)
-      )
       .where(eq(UsersDatabaseSchema.id, userId))
       .limit(1);
 

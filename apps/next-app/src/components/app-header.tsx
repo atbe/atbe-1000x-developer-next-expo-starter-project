@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
@@ -29,6 +30,7 @@ import { trpc } from '~/utils/trpc';
 export function AppHeader() {
   const router = useRouter();
   const { signOut } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { user } = useAuthStore();
   const isAdmin = useIsAdmin();
 
@@ -36,16 +38,16 @@ export function AppHeader() {
   const { data: subscription } = trpc.subscription.getMySubscription.useQuery(
     undefined,
     {
-      enabled: !!user,
+      enabled: !!isAuthenticated,
       retry: false,
     },
   );
   const currentTier = subscription?.tier || 'free';
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = useCallback(async () => {
+    await signOut();
     router.push('/');
-  };
+  }, [signOut, router]);
 
   // Get user initials for avatar fallback
   const getUserInitials = (
@@ -118,7 +120,7 @@ export function AppHeader() {
             </nav>
 
             {/* Current Tier Badge - show for logged in users */}
-            {user && (
+            {isAuthenticated && (
               <Badge
                 variant={currentTier === 'premium' ? 'default' : 'secondary'}
                 className="hidden sm:flex items-center space-x-1"

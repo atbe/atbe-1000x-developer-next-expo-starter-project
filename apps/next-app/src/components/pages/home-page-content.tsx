@@ -10,11 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
-import { useAuthStore } from '~/stores/auth-store';
+import { useAuth } from '~/providers/auth-provider';
 
 export function HomePageContent() {
-  const { isAuthenticated, hasHydrated } = useAuthStore();
-  const showAuthUI = hasHydrated;
+  const { isAuthenticated } = useAuth();
+  const showAuthUI = true;
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-br from-background via-background to-muted/10">

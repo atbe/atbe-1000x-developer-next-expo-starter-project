@@ -24,12 +24,6 @@ export function createContainer({
   useLocal = false,
   stripeSecretKey = "fake_default",
   premiumMonthlyStripeProductId = "fake_default",
-  jwtConfig = {
-    secret: process.env.JWT_SECRET,
-    expiresIn: "7d", // Token expires in 7 days
-    issuer: "starterp",
-    audience: "starterp-api",
-  },
   defaultAppConfig = {
     trpcServerUrl: process.env.APP_CONFIG_TRPC_SERVER_URL,
     gotrueUrl: process.env.APP_CONFIG_GOTRUE_URL,
@@ -38,7 +32,6 @@ export function createContainer({
       analytics: false,
     },
   },
-  gotrueServiceRoleKey = process.env.GOTRUE_SERVICE_ROLE_KEY || "fake_default",
   betterAuthConfig = {
     secret: process.env.BETTER_AUTH_SECRET || "fake_default",
     databaseUrl: process.env.DATABASE_URL,
@@ -59,10 +52,6 @@ export function createContainer({
     autobind: true,
     defaultScope: "Singleton",
   });
-
-  if (!jwtConfig.secret) {
-    throw new Error("JWT_SECRET is not set in the .env file");
-  }
 
   container.bind<DatabaseType>(TYPES.Database).toConstantValue(db);
 
@@ -85,11 +74,6 @@ export function createContainer({
   container
     .bind<AppConfig>(TYPES.DEFAULT_APP_CONFIG)
     .toConstantValue(defaultAppConfig);
-
-  container.bind<JwtConfig>(TYPES.JWT_CONFIG).toConstantValue(jwtConfig);
-  container
-    .bind<string>(TYPES.GOTRUE_SERVICE_ROLE_KEY)
-    .toConstantValue(gotrueServiceRoleKey);
 
   container
     .bind<BetterAuthConfig>(TYPES.BETTER_AUTH_CONFIG)

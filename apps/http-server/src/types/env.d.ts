@@ -7,13 +7,6 @@ export interface WorkerEnv {
   STRIPE_WEBHOOK_SECRET: string;
   PREMIUM_MONTHLY_STRIPE_PRODUCT_ID: string;
 
-  // GoTrue
-  GOTRUE_URL: string;
-  GOTRUE_SERVICE_ROLE_KEY: string;
-
-  // JWT
-  JWT_SECRET: string;
-
   // Logging
   LOG_LEVEL: "debug" | "info" | "warn" | "error";
 
@@ -47,13 +40,6 @@ declare global {
       STRIPE_SECRET_KEY: string;
       STRIPE_WEBHOOK_SECRET?: string;
       PREMIUM_MONTHLY_STRIPE_PRODUCT_ID: string;
-
-      // GoTrue
-      GOTRUE_URL?: string;
-      GOTRUE_SERVICE_ROLE_KEY?: string;
-
-      // JWT
-      JWT_SECRET?: string;
 
       // Logging
       LOG_LEVEL?: "debug" | "info" | "warn" | "error";

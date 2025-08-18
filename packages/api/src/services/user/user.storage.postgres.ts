@@ -1,4 +1,4 @@
-import { AuthUsers, UsersDatabaseSchema } from "@starterp/db";
+import { users, UsersDatabaseSchema } from "@starterp/db";
 import type { User, UserStorageInterface } from "@starterp/models";
 import type { Logger } from "@starterp/tooling";
 import { eq } from "drizzle-orm";
@@ -58,13 +58,12 @@ export class UserStoragePostgres implements UserStorageInterface {
     const result = await this.db
       .select({
         id: UsersDatabaseSchema.id,
-        email: AuthUsers.email,
+        email: users.email,
         createdAt: UsersDatabaseSchema.createdAt,
         updatedAt: UsersDatabaseSchema.updatedAt,
         stripeCustomerId: UsersDatabaseSchema.stripeCustomerId,
       })
       .from(UsersDatabaseSchema)
-      .innerJoin(AuthUsers, eq(UsersDatabaseSchema.id, AuthUsers.id))
       .where(eq(UsersDatabaseSchema.id, _id));
 
     if (result.length === 0) {
@@ -118,9 +117,9 @@ export class UserStoragePostgres implements UserStorageInterface {
 
       // Get email from GoTrue users table
       const emailResult = await this.db
-        .select({ email: AuthUsers.email })
-        .from(AuthUsers)
-        .where(eq(AuthUsers.id, user.id));
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, user.id));
 
       const email = emailResult[0]?.email || "";
 

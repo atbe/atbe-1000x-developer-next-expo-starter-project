@@ -36,15 +36,27 @@ export class BetterAuthService implements AuthService {
     return this.auth;
   }
 
-  async ensureUser(
-    email: string,
-    password: string,
-    firstName?: string,
-    lastName?: string
-  ): Promise<{ id: string }> {
+  async ensureUser({
+    email,
+    password,
+    firstName,
+    lastName,
+  }: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+  }): Promise<{ id: string }> {
     try {
       const name =
         firstName && lastName ? `${firstName} ${lastName}` : undefined;
+
+      this.logger.info("Ensuring user", {
+        email,
+        name,
+        firstName,
+        lastName,
+      });
 
       const response = await this.auth.api.signUpEmail({
         body: {

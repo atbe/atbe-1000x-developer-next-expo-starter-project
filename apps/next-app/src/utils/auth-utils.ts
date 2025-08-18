@@ -1,4 +1,4 @@
-import type { UserInfo, UserRole, FrontendUser } from '@starterp/models';
+import type { FrontendUser, UserInfo, UserRole } from '@starterp/models';
 
 /**
  * Extract roles from GoTrue user info.
@@ -66,23 +66,23 @@ export function userInfoToFrontendUser(userInfo: UserInfo): FrontendUser {
     firstName,
     lastName,
     name: fullName || undefined,
-    roles,
+    role: roles[0],
   };
 }
 
 /**
  * Check if user has admin role.
  */
-export function isAdmin(user: { roles?: UserRole[] } | null): boolean {
-  return user?.roles?.includes('admin') || false;
+export function isAdmin(user: { role?: UserRole } | null): boolean {
+  return user?.role === 'admin';
 }
 
 /**
  * Check if user has a specific role.
  */
 export function hasRole(
-  user: { roles?: UserRole[] } | null,
+  user: { role?: UserRole } | null,
   role: UserRole,
 ): boolean {
-  return user?.roles?.includes(role) || false;
+  return user?.role === role;
 }

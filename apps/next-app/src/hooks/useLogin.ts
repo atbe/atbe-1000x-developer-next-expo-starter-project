@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useAuth } from '~/providers/auth-provider';
+import { authClient } from '~/lib/auth-client';
 
 export interface LoginCredentials {
   email: string;
@@ -16,7 +16,6 @@ export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const auth = useAuth();
 
   const login = async (credentials: LoginCredentials): Promise<LoginResult> => {
     setIsLoading(true);
@@ -24,10 +23,10 @@ export function useLogin() {
 
     try {
       // Sign in with better-auth
-      const response = await auth.signIn(
-        credentials.email,
-        credentials.password,
-      );
+      const response = await authClient.signIn.email({
+        email: credentials.email,
+        password: credentials.password,
+      });
 
       if (response.error) {
         setError(response.error.message || 'Failed to sign in');
@@ -42,8 +41,7 @@ export function useLogin() {
         };
       }
 
-      // The auth provider will handle setting the user and token
-      // Just redirect to intended page
+      // Redirect to intended page
       const redirectUrl = router.query.redirect as string;
       const destination = redirectUrl || '/dashboard';
       await router.push(destination);
@@ -64,12 +62,10 @@ export function useLogin() {
     setError(null);
 
     try {
-      const { error: signInError } = await auth.signInWithGoogle();
-
-      if (signInError) {
-        setError(signInError.message || 'Failed to sign in with Google');
-        return { success: false, error: signInError.message };
-      }
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: `${window.location.origin}/auth/callback`,
+      });
 
       // OAuth flow will redirect, so we don't need to handle success here
       return { success: true };

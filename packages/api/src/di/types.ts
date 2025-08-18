@@ -20,10 +20,6 @@ export const TYPES = {
   // Logger
   LOGGER_CONFIG: Symbol("LOGGER_CONFIG"),
 
-  // JWT
-  JWT_CONFIG: Symbol("JWT_CONFIG"),
-  GOTRUE_SERVICE_ROLE_KEY: Symbol("GOTRUE_SERVICE_ROLE_KEY"),
-
   // Better Auth
   BETTER_AUTH_CONFIG: Symbol("BETTER_AUTH_CONFIG"),
 };

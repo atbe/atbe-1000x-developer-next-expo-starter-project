@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '~/providers/auth-provider';
 import { useAuthStore } from '~/stores/auth-store';
 import { trpc } from '~/utils/trpc';
-import { Loader2 } from 'lucide-react';
-import { useIsAdmin } from '~/hooks/auth/use-roles';
 
 interface ProtectedAdminRouteProps {
   children: React.ReactNode;
@@ -11,9 +11,10 @@ interface ProtectedAdminRouteProps {
 
 export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, hasHydrated } = useAuthStore();
-  const isAdmin = useIsAdmin();
+  const { isAuthenticated, hasHydrated } = useAuth();
   const [isCheckingRole, setIsCheckingRole] = useState(true);
+  const { user } = useAuthStore();
+  const isAdmin = useMemo(() => user?.role === 'admin', [user]);
 
   // Check if user has admin role
   const {
@@ -33,7 +34,7 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
         setIsCheckingRole(false);
         return;
       }
-      
+
       // If no admin role in store, verify with API call
       if (!isLoading) {
         if (stats) {
@@ -69,7 +70,7 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   }
 
   // If not authenticated or not admin, will redirect (return null to avoid flash)
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAuthenticated || !isAdmin || !hasHydrated) {
     return null;
   }
 

@@ -27,7 +27,6 @@ export const auth = (
       provider: "pg",
       schema: config.schema,
       usePlural: true,
-      debugLogs: true,
     }),
     baseURL: config.baseURL,
     secret: config.secret,

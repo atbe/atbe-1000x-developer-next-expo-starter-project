@@ -32,7 +32,6 @@ export function createContainer({
     issuer: "starterp",
     audience: "starterp-api",
   },
-  gotrueServiceRoleKey = process.env.GOTRUE_SERVICE_ROLE_KEY || "fake_default",
   betterAuthConfig = {
     secret: process.env.BETTER_AUTH_SECRET || "fake_default",
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -47,7 +46,6 @@ export function createContainer({
   stripeSecretKey?: string;
   premiumMonthlyStripeProductId?: string;
   jwtConfig?: JwtConfig;
-  gotrueServiceRoleKey?: string;
   betterAuthConfig?: BetterAuthConfig;
 }) {
   const container = new Container({
@@ -59,7 +57,6 @@ export function createContainer({
 
   container.bind<AppConfig>(TYPES.DEFAULT_APP_CONFIG).toConstantValue({
     trpcServerUrl: process.env.TRPC_SERVER_URL || "http://localhost:8787",
-    gotrueUrl: process.env.GOTRUE_URL || "http://localhost:9999",
     features: {
       autoUpdate: true,
       analytics: false,
@@ -81,11 +78,6 @@ export function createContainer({
   container
     .bind<BillingStorageInterface>(TYPES.BillingStorage)
     .to(useLocal ? BillingStorageInMemory : BillingStoragePostgres);
-
-  container.bind<JwtConfig>(TYPES.JWT_CONFIG).toConstantValue(jwtConfig);
-  container
-    .bind<string>(TYPES.GOTRUE_SERVICE_ROLE_KEY)
-    .toConstantValue(gotrueServiceRoleKey);
 
   container
     .bind<string>(TYPES.StripeSecretKey)

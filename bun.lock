@@ -61,10 +61,6 @@
         "typescript-eslint": "^8.38.0",
       },
     },
-    "apps/go-true-server-railway": {
-      "name": "@starterp/go-true-server-railway",
-      "version": "1.0.0",
-    },
     "apps/http-server": {
       "name": "@starterp/http-server",
       "dependencies": {
@@ -1005,8 +1001,6 @@
     "@starterp/db": ["@starterp/db@workspace:packages/db"],
 
     "@starterp/db-migrations": ["@starterp/db-migrations@workspace:packages/db-migrations"],
-
-    "@starterp/go-true-server-railway": ["@starterp/go-true-server-railway@workspace:apps/go-true-server-railway"],
 
     "@starterp/http-server": ["@starterp/http-server@workspace:apps/http-server"],
 

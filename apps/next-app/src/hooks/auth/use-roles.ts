@@ -1,9 +1,9 @@
+import type { UserRole } from '@starterp/models';
 import { useAuthStore } from '~/stores/auth-store';
 import {
-  isAdmin as isAdminUtil,
   hasRole as hasRoleUtil,
+  isAdmin as isAdminUtil,
 } from '~/utils/auth-utils';
-import type { UserRole } from '@starterp/models';
 
 /**
  * Hook to check if the current user is an admin.
@@ -24,7 +24,7 @@ export function useHasRole(role: UserRole): boolean {
 /**
  * Hook to get all roles for the current user.
  */
-export function useUserRoles(): UserRole[] {
+export function useUserRole(): UserRole {
   const { user } = useAuthStore();
-  return user?.roles || [];
+  return user?.role || 'user';
 }

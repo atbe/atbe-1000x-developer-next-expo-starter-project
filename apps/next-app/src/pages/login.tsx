@@ -13,14 +13,14 @@ import { Code2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import { useAuthStore } from '~/stores/auth-store';
 import { Footer } from '~/components/footer';
 import { useLogin } from '~/hooks/useLogin';
 import { GoogleIcon } from '~/components/icons/google-icon';
+import { useSession } from '~/hooks/use-session';
 
 export default function Login() {
   const router = useRouter();
-  const { isAuthenticated, hasHydrated } = useAuthStore();
+  const { isAuthenticated, isLoading: sessionLoading } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -32,11 +32,11 @@ export default function Login() {
 
   // Redirect to dashboard or intended page if already authenticated
   useEffect(() => {
-    if (hasHydrated && isAuthenticated) {
+    if (!sessionLoading && isAuthenticated) {
       const destination = redirectUrl || '/dashboard';
       router.push(destination);
     }
-  }, [hasHydrated, isAuthenticated, router, redirectUrl]);
+  }, [sessionLoading, isAuthenticated, router, redirectUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ export default function Login() {
   };
 
   // Show loading while checking auth status
-  if (!hasHydrated) {
+  if (sessionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

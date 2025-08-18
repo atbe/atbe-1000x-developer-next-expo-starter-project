@@ -9,15 +9,19 @@ export const isAuthenticated = middleware(async ({ ctx, next }) => {
     const session = await ctx.betterAuthService.auth.api.getSession({
       headers: ctx.c.req.raw.headers,
     });
-    
+
     if (session?.user) {
       // Transform better-auth user to JWT payload format for compatibility
-      const user = {
-        id: session.user.id,
-        email: session.user.email,
-        roles: (session.user as any).roles || ["user"],
-      };
+      // Better-auth user with custom fields
+      type BetterAuthUser = typeof session.user & { roles?: string[] };
+      const betterAuthUser = session.user as BetterAuthUser;
       
+      const user = {
+        id: betterAuthUser.id,
+        email: betterAuthUser.email,
+        roles: betterAuthUser.roles || ["user"],
+      };
+
       return next({
         ctx: {
           ...ctx,
@@ -28,7 +32,7 @@ export const isAuthenticated = middleware(async ({ ctx, next }) => {
   } catch (_cookieError) {
     // Cookie auth failed, try Bearer token
   }
-  
+
   // Fallback to Bearer token authentication (for backward compatibility)
   const authHeader = ctx.c.req.header("authorization");
 

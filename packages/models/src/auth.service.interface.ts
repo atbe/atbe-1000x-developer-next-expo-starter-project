@@ -10,13 +10,17 @@ export interface AuthService {
    * If not provided or user doesn't exist, creates a new user.
    * Should be idempotent.
    */
-  ensureUser(
-    email: string,
-    password: string,
-    userId?: string,
-    firstName?: string,
-    lastName?: string
-  ): Promise<{ id: string }>;
+  ensureUser({
+    email,
+    password,
+    firstName,
+    lastName,
+  }: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+  }): Promise<{ id: string }>;
 
   /**
    * Verify a user's password against the auth provider.

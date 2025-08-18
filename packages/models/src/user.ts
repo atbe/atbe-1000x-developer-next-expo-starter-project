@@ -30,7 +30,7 @@ export const frontendUserSchema = z.object({
   firstName: z.string().nullable().optional(),
   lastName: z.string().nullable().optional(),
   name: z.string().optional(),
-  roles: z.array(userRoleSchema).default([]),
+  role: userRoleSchema,
 });
 
 export type FrontendUser = z.infer<typeof frontendUserSchema>;

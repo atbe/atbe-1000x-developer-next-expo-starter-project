@@ -1,34 +1,18 @@
-import { bearer } from 'better-auth/plugins';
-import { createAuthClient } from 'better-auth/react';
-import React, { createContext, useContext, useEffect, useRef } from 'react';
-import { useSetUserInfo } from '~/hooks/auth/useSetUserInfo';
+import React, { createContext, useContext, useEffect } from 'react';
+import { authClient, useSession } from '~/lib/auth-client';
 import { useAuthStore } from '~/stores/auth-store';
 
 interface AuthContextValue {
-  client: ReturnType<typeof createAuthClient> | null;
-  signUp: (
-    email: string,
-    password: string,
-    metadata?: Record<string, any>,
-  ) => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
-  signInWithGoogle: () => Promise<any>;
-  signOut: () => Promise<any>;
-  getSession: () => Promise<any>;
-  getUser: () => Promise<any>;
-  useSession: () => any;
+  signIn: typeof authClient.signIn.email;
+  signUp: typeof authClient.signUp.email;
+  signOut: typeof authClient.signOut;
+  session: ReturnType<typeof useSession>;
+  isAuthenticated: boolean;
+  hasHydrated: boolean;
+  refresh: typeof authClient.getSession;
 }
 
-const AuthContext = createContext<AuthContextValue>({
-  client: null,
-  signUp: async () => ({}),
-  signIn: async () => ({}),
-  signInWithGoogle: async () => ({}),
-  signOut: async () => ({}),
-  getSession: async () => ({}),
-  getUser: async () => ({}),
-  useSession: () => null,
-});
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -47,165 +31,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const setUser = useAuthStore((state) => state.updateUser);
   const updateToken = useAuthStore((state) => state.updateToken);
   const logout = useAuthStore((state) => state.logout);
-  const setUserInfo = useSetUserInfo();
 
-  const authClientRef = useRef<ReturnType<typeof createAuthClient> | null>(
-    null,
-  );
+  // Use better-auth's built-in useSession hook
+  const session = useSession();
 
-  // Initialize Better Auth client
+  // Sync session with auth store
   useEffect(() => {
-    if (!authClientRef.current) {
-      authClientRef.current = createAuthClient({
-        baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3042',
-        basePath: '/api/auth',
-        fetchOptions: {
-          credentials: 'include',
-        },
-        plugins: [bearer()],
-      });
+    if (session.data) {
+      setUser(session.data.user);
+      // Store token if available
+      const token = session.data.session.token || '';
+      updateToken(token);
     }
-  }, []);
+  }, [session.data, setUser, updateToken]);
 
-  // Listen for auth state changes
+  // Handle hydration
   useEffect(() => {
-    if (!authClientRef.current) return;
-
-    // Use better-auth's session monitoring
-    const checkSession = async () => {
-      try {
-        const session = await authClientRef.current!.getSession();
-
-        if (session.data) {
-          setUser(session.data.user);
-          updateToken(session.data.token || '');
-          setUserInfo();
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-      }
-    };
-
-    // Check session on mount only
-    checkSession();
-
-    // Don't check periodically to avoid loops - better-auth handles this internally
-    // Sessions are checked on each request automatically
-  }, [setUser, setUserInfo, updateToken]);
-
-  useEffect(() => {
-    // Trigger rehydration on mount
     const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
       setHasHydrated(true);
     });
-
-    // Rehydrate immediately
     useAuthStore.persist.rehydrate();
+    return () => unsubscribe();
+  }, [setHasHydrated]);
 
-    return () => {
-      unsubscribe();
-    };
-  }, [setHasHydrated, setUserInfo]);
-
-  const authMethods: AuthContextValue = {
-    client: authClientRef.current,
-
-    signUp: async (
-      email: string,
-      password: string,
-      metadata?: Record<string, any>,
-    ) => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      const response = await authClientRef.current.signUp.email(
-        {
-          email,
-          password,
-          name: metadata?.name || '',
-        },
-        {
-          onSuccess: (ctx) => {
-            const authToken = ctx.response.headers.get('set-auth-token'); // get the token from the response headers
-            // Store the token securely (e.g., in localStorage)
-            localStorage.setItem('bearer_token', authToken || '');
-          },
-          onError: (error) => {
-            console.error('Error signing up:', error);
-          },
-        },
-      );
-
-      if (response.data) {
-        setUser(response.data.user);
-        updateToken(response.data.token || '');
-        setUserInfo();
-      }
-
-      return response;
-    },
-
-    signIn: async (email: string, password: string) => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      const response = await authClientRef.current.signIn.email({
-        email,
-        password,
-      });
-
-      if (response.data) {
-        setUser(response.data.user);
-        updateToken(response.data.token || '');
-        setUserInfo();
-      }
-
-      return response;
-    },
-
-    signInWithGoogle: async () => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      await authClientRef.current.signIn.social({
-        provider: 'google',
-        callbackURL: `${window.location.origin}/auth/callback`,
-      });
-    },
-
-    signOut: async () => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      const response = await authClientRef.current.signOut();
-      logout();
-      return response;
-    },
-
-    getSession: async () => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      return authClientRef.current.getSession();
-    },
-
-    getUser: async () => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      const session = await authClientRef.current.getSession();
-      return session.data?.user || null;
-    },
-
-    useSession: () => {
-      if (!authClientRef.current)
-        throw new Error('Auth client not initialized');
-
-      return authClientRef.current.useSession();
-    },
+  const value: AuthContextValue = {
+    signIn: authClient.signIn.email,
+    signUp: authClient.signUp.email,
+    signOut: authClient.signOut,
+    session,
+    isAuthenticated: !!session.data,
+    hasHydrated: session.isPending === false,
+    refresh: authClient.getSession,
   };
 
-  return (
-    <AuthContext.Provider value={authMethods}>{children}</AuthContext.Provider>
-  );
+  // Handle logout separately
+  useEffect(() => {
+    if (!session.data && session.isPending === false) {
+      // Session is gone, clear local state
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        logout();
+      }
+    }
+  }, [session.data, session.isPending, logout]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

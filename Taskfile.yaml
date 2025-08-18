@@ -152,24 +152,6 @@ tasks:
         echo "Cleaning node_modules"
         find . -name "node_modules" -type d -exec rm -rf {} +
 
-  gotrue:service-key:
-    desc: Generate a local service_role JWT for GoTrue
-    cmds:
-      - |
-        if [ -z "$GOTRUE_JWT_SECRET" ]; then
-          echo "GOTRUE_JWT_SECRET is not set, set it in the .env file"
-          exit 1
-        fi
-        header=$(printf '{"alg":"HS256","typ":"JWT"}' | openssl base64 -A | tr '+/' '-_' | tr -d '=')
-        now=$(date +%s)
-        payload=$(printf '{"role":"service_role","iss":"supabase","iat":%s,"exp":%s}' "$now" $((now+315360000)) \
-                 | openssl base64 -A | tr '+/' '-_' | tr -d '=')
-        sig=$(printf '%s.%s' "$header" "$payload" \
-              | openssl dgst -sha256 -hmac "$GOTRUE_JWT_SECRET" -binary \
-              | openssl base64 -A | tr '+/' '-_' | tr -d '=')
-        echo -e "\n--- SERVICE ROLE JWT (10y) ---\n$header.$payload.$sig\n"
-
-
   run-stripe-webhook-locally:
     desc: "Run the stripe webhook locally"
     cmds:

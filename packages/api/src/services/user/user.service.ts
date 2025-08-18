@@ -49,13 +49,12 @@ export class UserService {
       return existingUser;
     }
 
-    const { id: newId } = await this.authService.ensureUser(
-      user.email,
-      user.password,
-      user.id,
-      user.firstName,
-      user.lastName
-    );
+    const { id: newId } = await this.authService.ensureUser({
+      email: user.email,
+      password: user.password,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
 
     return {
       id: newId,

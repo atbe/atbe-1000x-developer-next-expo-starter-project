@@ -1,11 +1,16 @@
 import { useCallback } from 'react';
+import { useAuth } from '~/providers/auth-provider';
+import { useAuthStore } from '~/stores/auth-store';
 
 export function useSetUserInfo() {
+  const { session } = useAuth();
+  const setUser = useAuthStore((state) => state.updateUser);
+
   const setUserInfo = useCallback(async () => {
-    // Better-auth handles session management internally
-    // This hook is kept for compatibility but can be simplified
-    // UserInfo will be set through the auth-provider when session changes
-  }, []);
+    if (session.data) {
+      setUser(session.data.user);
+    }
+  }, [session.data, setUser]);
 
   return setUserInfo;
 }

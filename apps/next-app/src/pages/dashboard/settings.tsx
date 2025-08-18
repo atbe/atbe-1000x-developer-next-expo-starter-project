@@ -1,5 +1,4 @@
-import { User, Shield, Settings as SettingsIcon } from 'lucide-react';
-import { useMemo } from 'react';
+import { Settings as SettingsIcon, Shield, User } from 'lucide-react';
 import { AppHeader } from '~/components/app-header';
 import { ProtectedRoute } from '~/components/auth/protected-route';
 import { Footer } from '~/components/footer';
@@ -13,27 +12,18 @@ import {
 } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { useUserRole } from '~/hooks/auth/use-roles';
 import { useToast } from '~/hooks/use-toast';
 import { useTokenRefresh } from '~/hooks/use-token-refresh';
 import { useAuthStore } from '~/stores/auth-store';
-import { useUserRoles } from '~/hooks/auth/use-roles';
 
 export default function Settings() {
   const { toast } = useToast();
   const { user, userInfo } = useAuthStore();
   const { refreshToken } = useTokenRefresh();
-  const userRoles = useUserRoles();
+  const userRole = useUserRole();
 
   console.log('user', user, userInfo);
-
-  const firstName = useMemo(
-    () => userInfo?.user?.app_metadata?.first_name ?? '',
-    [userInfo],
-  );
-  const lastName = useMemo(
-    () => userInfo?.user?.app_metadata?.last_name ?? '',
-    [userInfo],
-  );
 
   return (
     <ProtectedRoute>
@@ -72,37 +62,17 @@ export default function Settings() {
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-3">
                     <Label
-                      htmlFor="firstName"
+                      htmlFor="name"
                       className="text-sm font-medium text-foreground/80"
                     >
-                      First Name
+                      Name
                     </Label>
                     <div className="relative group">
                       <Input
-                        id="firstName"
+                        id="name"
                         type="text"
-                        value={firstName}
-                        placeholder="Enter your first name"
-                        disabled={true}
-                        className="input-apple bg-background/30 backdrop-blur-apple border-border/30 focus:border-primary/50 focus:bg-background/50 transition-all duration-300"
-                      />
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label
-                      htmlFor="lastName"
-                      className="text-sm font-medium text-foreground/80"
-                    >
-                      Last Name
-                    </Label>
-                    <div className="relative group">
-                      <Input
-                        id="lastName"
-                        type="text"
-                        value={lastName}
-                        placeholder="Enter your last name"
+                        value={user?.name}
+                        placeholder="Enter your name"
                         disabled={true}
                         className="input-apple bg-background/30 backdrop-blur-apple border-border/30 focus:border-primary/50 focus:bg-background/50 transition-all duration-300"
                       />
@@ -167,7 +137,7 @@ export default function Settings() {
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
                       </div>
                       <span className="text-sm font-medium capitalize">
-                        {userRoles.length > 0 ? userRoles.join(', ') : 'user'}
+                        {userRole}
                       </span>
                     </div>
                   </div>

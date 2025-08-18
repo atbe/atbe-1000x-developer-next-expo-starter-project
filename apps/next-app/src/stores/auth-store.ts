@@ -8,7 +8,6 @@ interface AuthState {
   user: FrontendUser | null;
   userInfo: UserInfo | null;
   token: string | null;
-  isAuthenticated: boolean;
   hasHydrated: boolean;
 
   // Actions
@@ -26,14 +25,12 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       userInfo: null,
       token: null,
-      isAuthenticated: false,
       hasHydrated: false,
 
       login: (user, token) => {
         set({
           user,
           token,
-          isAuthenticated: true,
         });
       },
 
@@ -41,7 +38,6 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           token: null,
-          isAuthenticated: false,
         });
         localStorage.clear();
         sessionStorage.clear();
@@ -57,7 +53,6 @@ export const useAuthStore = create<AuthState>()(
           user: state.user
             ? { ...state.user, ...userData }
             : (userData as FrontendUser),
-          isAuthenticated: true,
         }));
       },
 
@@ -79,7 +74,6 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        isAuthenticated: state.isAuthenticated,
         userInfo: state.userInfo,
       }), // only persist these fields (not hasHydrated)
       onRehydrateStorage: () => (state) => {

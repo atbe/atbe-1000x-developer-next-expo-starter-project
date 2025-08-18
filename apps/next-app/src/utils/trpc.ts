@@ -71,26 +71,23 @@ export const trpc = createTRPCNext<AppRouter, SSRContext>({
                     observer.next(value);
                   },
                   error(err) {
-                    if (
-                      err?.data?.httpStatus === 403 ||
-                      err?.data?.httpStatus === 401
-                    ) {
-                      console.error('[tRPC 403/401 Error]', {
-                        path: op.path,
-                        type: op.type,
-                        input: op.input,
-                        error: err.message,
-                        data: err.data,
-                      });
+                    // if (err?.data?.httpStatus === 403) {
+                    //   console.error('[tRPC 403/401 Error]', {
+                    //     path: op.path,
+                    //     type: op.type,
+                    //     input: op.input,
+                    //     error: err.message,
+                    //     data: err.data,
+                    //   });
 
-                      const redirectTo = window.location.pathname;
-                      const redirectToLogin = `${getBaseUrl()}/login?redirectTo=${redirectTo}`;
-                      if (typeof window !== 'undefined') {
-                        localStorage.clear();
-                        sessionStorage.clear();
-                        window.location.href = redirectToLogin;
-                      }
-                    }
+                    //   const redirectTo = window.location.pathname;
+                    //   const redirectToLogin = `${getBaseUrl()}/login?redirectTo=${redirectTo}`;
+                    //   if (typeof window !== 'undefined') {
+                    //     localStorage.clear();
+                    //     sessionStorage.clear();
+                    //     window.location.href = redirectToLogin;
+                    //   }
+                    // }
                     observer.error(err);
                   },
                   complete() {

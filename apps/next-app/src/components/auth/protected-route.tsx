@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { useAuthStore } from '~/stores/auth-store';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useAuth } from '~/providers/auth-provider';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,25 +13,23 @@ export function ProtectedRoute({
   redirectTo = '/login',
 }: ProtectedRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, token, hasHydrated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     // Wait for hydration before checking auth
-    if (hasHydrated) {
-      if (!isAuthenticated || !token) {
-        // Preserve the current path as a redirect parameter
-        const currentPath = router.asPath;
-        const redirectUrl = `${redirectTo}?redirect=${encodeURIComponent(currentPath)}`;
-        router.push(redirectUrl);
-      } else {
-        setIsChecking(false);
-      }
+    if (!isAuthenticated) {
+      // Preserve the current path as a redirect parameter
+      const currentPath = router.asPath;
+      const redirectUrl = `${redirectTo}?redirect=${encodeURIComponent(currentPath)}`;
+      router.push(redirectUrl);
+    } else {
+      setIsChecking(false);
     }
-  }, [hasHydrated, isAuthenticated, token, router, redirectTo]);
+  }, [isAuthenticated, router, redirectTo]);
 
   // Show loading spinner while hydrating or checking auth
-  if (!hasHydrated || isChecking) {
+  if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -40,7 +38,7 @@ export function ProtectedRoute({
   }
 
   // If we get here and not authenticated, return null (redirect will happen)
-  if (!isAuthenticated || !token) {
+  if (!isAuthenticated) {
     return null;
   }
 
