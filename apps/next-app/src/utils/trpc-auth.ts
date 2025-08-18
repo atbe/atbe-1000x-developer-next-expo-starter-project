@@ -6,7 +6,7 @@ import { useAuthStore } from '~/stores/auth-store';
 export const getTRPCAuthHeaders = () => {
   // Better-auth uses httpOnly cookies by default, which are automatically sent
   // We can optionally include the token from the store if needed for Bearer auth
-  const token = localStorage.getItem('bearer_token');
+  const token = useAuthStore.getState().token;
 
   if (token) {
     return {

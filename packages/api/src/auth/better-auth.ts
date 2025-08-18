@@ -1,7 +1,7 @@
 import type { Logger } from "@starterp/tooling";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin } from "better-auth/plugins";
+import { admin, bearer } from "better-auth/plugins";
 import type { DatabaseType } from "../types/database";
 import { betterAuthOptions } from "./options";
 
@@ -40,7 +40,7 @@ export const auth = (
       },
     },
 
-    plugins: [admin()],
+    plugins: [admin(), bearer()],
 
     // Additional options that depend on env ...
 
